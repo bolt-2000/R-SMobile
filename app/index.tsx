@@ -266,7 +266,6 @@ export default function SplashScreen() {
                 particleAnimatedStyle,
                 {
                   left: Math.random() * width,
-                  animationDelay: `${Math.random() * 2}s`,
                 }
               ]}
             />
@@ -317,10 +316,10 @@ export default function SplashScreen() {
 
                   {/* Sound Waves */}
                   <View style={styles.soundWaves}>
-                    <Animated.View style={[styles.soundWave, styles.wave1, waveAnimatedStyle]}>
+                    <Animated.View style={[styles.soundWave, styles.soundWave1, waveAnimatedStyle]}>
                       <Waves size={12} color="rgba(255,255,255,0.6)" />
                     </Animated.View>
-                    <Animated.View style={[styles.soundWave, styles.wave2, waveAnimatedStyle]}>
+                    <Animated.View style={[styles.soundWave, styles.soundWave2, waveAnimatedStyle]}>
                       <Radio size={10} color="rgba(255,255,255,0.4)" />
                     </Animated.View>
                   </View>
@@ -469,6 +468,14 @@ const styles = StyleSheet.create({
   },
   soundWave: {
     position: 'absolute',
+  },
+  soundWave1: {
+    top: 10,
+    left: -20,
+  },
+  soundWave2: {
+    bottom: 10,
+    right: -20,
   },
   glowEffect: {
     position: 'absolute',
