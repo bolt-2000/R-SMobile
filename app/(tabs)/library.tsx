@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform } from 'react-native';
 import { useState } from 'react';
-import { Heart, Download, Clock, Play, TrendingUp, BookOpen, Share2, MoreHorizontal } from 'lucide-react-native';
+import { Heart, Download, Clock, Play, TrendingUp, BookOpen, Share2, MoveHorizontal as MoreHorizontal } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '@/constants/Colors';
 

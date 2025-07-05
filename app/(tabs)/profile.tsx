@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Settings, Edit3, Mic, Headphones, Calendar, Award, Share2, Bell, TrendingUp, Users } from 'lucide-react-native';
+import { Settings, CreditCard as Edit3, Mic, Headphones, Calendar, Award, Share2, Bell, TrendingUp, Users } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
 
 const userStats = [
