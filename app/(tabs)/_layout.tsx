@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Chrome as Home, Search, Play, Library, User } from 'lucide-react-native';
 import { StyleSheet } from 'react-native';
+import { Colors } from '@/constants/Colors';
 
 export default function TabLayout() {
   return (
@@ -8,8 +9,8 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: '#6366F1',
-        tabBarInactiveTintColor: '#6B7280',
+        tabBarActiveTintColor: Colors.primary[400],
+        tabBarInactiveTintColor: Colors.neutral[500],
         tabBarLabelStyle: styles.tabBarLabel,
         tabBarItemStyle: styles.tabBarItem,
       }}>
@@ -64,9 +65,9 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: '#1F2937',
+    backgroundColor: Colors.dark.card,
     borderTopWidth: 1,
-    borderTopColor: '#374151',
+    borderTopColor: Colors.dark.border,
     paddingTop: 8,
     paddingBottom: 8,
     height: 70,

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import { useEffect, useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -14,6 +14,7 @@ import Animated, {
   runOnJS
 } from 'react-native-reanimated';
 import { Mic, Play, Volume2, Radio, Waves } from 'lucide-react-native';
+import { Colors } from '@/constants/Colors';
 
 const { width, height } = Dimensions.get('window');
 
@@ -33,6 +34,12 @@ export default function SplashScreen() {
   const waveAnimation = useSharedValue(0);
   const particleAnimation = useSharedValue(0);
   const borderAnimation = useSharedValue(0);
+
+  const triggerHapticFeedback = () => {
+    if (Platform.OS === 'web') {
+      console.log('Logo pressed');
+    }
+  };
 
   useEffect(() => {
     // Initial logo entrance with spring physics
@@ -240,6 +247,8 @@ export default function SplashScreen() {
       withSpring(1, { duration: 300 })
     );
     
+    triggerHapticFeedback();
+    
     setTimeout(() => {
       router.push('/auth');
     }, 200);
@@ -248,7 +257,7 @@ export default function SplashScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#0F0F23', '#1A1A3A', '#2D1B69', '#6366F1']}
+        colors={Colors.gradients.dark}
         style={styles.gradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -283,14 +292,14 @@ export default function SplashScreen() {
           >
             <Animated.View style={[styles.logoWrapper, logoAnimatedStyle]}>
               {/* Animated Border Ring */}
-              <Animated.View style={[styles.borderRing, borderAnimatedStyle]} />
+              <Animated.View style={[styles.borderRing, borderAnimatedStyle, { borderColor: Colors.secondary[400] }]} />
               
               {/* Glow Effect */}
-              <Animated.View style={[styles.glowEffect, glowAnimatedStyle]} />
+              <Animated.View style={[styles.glowEffect, glowAnimatedStyle, { backgroundColor: Colors.primary[500] + '30' }]} />
               
               {/* Main Logo Background */}
               <LinearGradient
-                colors={['#6366F1', '#8B5CF6', '#EC4899']}
+                colors={Colors.gradients.primary}
                 style={styles.logoBackground}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
@@ -304,7 +313,7 @@ export default function SplashScreen() {
                   {/* Rotating Play Icon */}
                   <Animated.View style={[styles.playIcon, playIconAnimatedStyle]}>
                     <LinearGradient
-                      colors={['#EC4899', '#F97316']}
+                      colors={Colors.gradients.accent}
                       style={styles.playIconBackground}
                     >
                       <Play size={16} color="#FFFFFF" fill="#FFFFFF" />
@@ -327,10 +336,15 @@ export default function SplashScreen() {
 
           {/* Brand Text */}
           <Animated.View style={[styles.brandContainer, textAnimatedStyle]}>
-            <Text style={styles.brandTitle}>RISE & SPEAK</Text>
-            <Text style={styles.brandSubtitle}>Video Podcast Platform</Text>
-            <View style={styles.taglineContainer}>
-              <Volume2 size={16} color="#A855F7" />
+            <LinearGradient
+              colors={Colors.gradients.primary}
+              style={styles.brandTitleGradient}
+            >
+              <Text style={styles.brandTitle}>RISE & SPEAK</Text>
+            </LinearGradient>
+            <Text style={[styles.brandSubtitle, { color: Colors.secondary[400] }]}>Video Podcast Platform</Text>
+            <View style={[styles.taglineContainer, { backgroundColor: Colors.dark.card, borderColor: Colors.secondary[600] }]}>
+              <Volume2 size={16} color={Colors.secondary[400]} />
               <Text style={styles.tagline}>Where Stories Come to Life</Text>
             </View>
           </Animated.View>
@@ -417,7 +431,6 @@ const styles = StyleSheet.create({
     height: 160,
     borderRadius: 80,
     borderWidth: 2,
-    borderColor: 'rgba(139, 92, 246, 0.8)',
     top: -10,
     left: -10,
   },
@@ -427,7 +440,7 @@ const styles = StyleSheet.create({
     borderRadius: 70,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#6366F1',
+    shadowColor: Colors.primary[500],
     shadowOffset: {
       width: 0,
       height: 20,
@@ -479,7 +492,6 @@ const styles = StyleSheet.create({
     width: 180,
     height: 180,
     borderRadius: 90,
-    backgroundColor: 'rgba(99, 102, 241, 0.3)',
     top: -20,
     left: -20,
     zIndex: -1,
@@ -488,13 +500,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 80,
   },
+  brandTitleGradient: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 16,
+    marginBottom: 8,
+  },
   brandTitle: {
     fontFamily: 'Inter-Bold',
     fontSize: 36,
     color: '#FFFFFF',
     textAlign: 'center',
     letterSpacing: 3,
-    marginBottom: 8,
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
@@ -502,7 +519,6 @@ const styles = StyleSheet.create({
   brandSubtitle: {
     fontFamily: 'Inter-Medium',
     fontSize: 16,
-    color: '#A855F7',
     textAlign: 'center',
     marginBottom: 16,
     letterSpacing: 1,
@@ -511,17 +527,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(168, 85, 247, 0.3)',
   },
   tagline: {
     fontFamily: 'Inter-Regular',
     fontSize: 14,
-    color: '#E5E7EB',
+    color: Colors.neutral[200],
   },
   ctaContainer: {
     alignItems: 'center',
@@ -530,7 +544,7 @@ const styles = StyleSheet.create({
   ctaText: {
     fontFamily: 'Inter-Regular',
     fontSize: 16,
-    color: '#D1D5DB',
+    color: Colors.neutral[300],
     textAlign: 'center',
     marginBottom: 20,
   },

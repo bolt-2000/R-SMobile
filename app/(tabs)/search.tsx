@@ -1,6 +1,8 @@
-import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, Image, Platform } from 'react-native';
 import { useState } from 'react';
-import { Search, Filter, TrendingUp, Play, Clock } from 'lucide-react-native';
+import { Search, Filter, TrendingUp, Play, Clock, Heart, Share2 } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Colors } from '@/constants/Colors';
 
 const popularSearches = [
   'Business Growth',
@@ -61,23 +63,60 @@ export default function SearchScreen() {
     setShowResults(query.length > 0);
   };
 
+  const handleFilterPress = () => {
+    console.log('Filter pressed');
+    // Handle filter functionality
+  };
+
+  const handleResultPress = (result: any) => {
+    console.log('Selected result:', result.title);
+    // Navigate to result
+  };
+
+  const handleLikePress = (result: any) => {
+    console.log('Liked:', result.title);
+    // Handle like functionality
+  };
+
+  const handleSharePress = (result: any) => {
+    console.log('Shared:', result.title);
+    // Handle share functionality
+  };
+
+  const triggerHapticFeedback = () => {
+    if (Platform.OS === 'web') {
+      console.log('Button pressed');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Search</Text>
+        <LinearGradient
+          colors={Colors.gradients.primary}
+          style={styles.titleGradient}
+        >
+          <Text style={styles.title}>RISE & SPEAK Search</Text>
+        </LinearGradient>
         <View style={styles.searchContainer}>
           <View style={styles.searchBar}>
-            <Search size={20} color="#6B7280" />
+            <Search size={20} color={Colors.neutral[500]} />
             <TextInput
               style={styles.searchInput}
               placeholder="Search podcasts, episodes, or topics..."
-              placeholderTextColor="#6B7280"
+              placeholderTextColor={Colors.neutral[500]}
               value={searchQuery}
               onChangeText={handleSearch}
             />
           </View>
-          <TouchableOpacity style={styles.filterButton}>
-            <Filter size={20} color="#6366F1" />
+          <TouchableOpacity 
+            style={[styles.filterButton, { borderColor: Colors.primary[500] }]}
+            onPress={() => {
+              handleFilterPress();
+              triggerHapticFeedback();
+            }}
+          >
+            <Filter size={20} color={Colors.primary[500]} />
           </TouchableOpacity>
         </View>
       </View>
@@ -86,15 +125,23 @@ export default function SearchScreen() {
         {!showResults ? (
           <View>
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Popular Searches</Text>
+              <LinearGradient
+                colors={Colors.gradients.secondary}
+                style={styles.sectionTitleGradient}
+              >
+                <Text style={styles.sectionTitle}>Popular Searches</Text>
+              </LinearGradient>
               <View style={styles.tagsContainer}>
                 {popularSearches.map((search, index) => (
                   <TouchableOpacity
                     key={index}
-                    style={styles.tag}
-                    onPress={() => handleSearch(search)}
+                    style={[styles.tag, { backgroundColor: Colors.dark.card, borderColor: Colors.primary[600] }]}
+                    onPress={() => {
+                      handleSearch(search);
+                      triggerHapticFeedback();
+                    }}
                   >
-                    <TrendingUp size={16} color="#6366F1" />
+                    <TrendingUp size={16} color={Colors.primary[400]} />
                     <Text style={styles.tagText}>{search}</Text>
                   </TouchableOpacity>
                 ))}
@@ -102,39 +149,74 @@ export default function SearchScreen() {
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Trending Now</Text>
+              <LinearGradient
+                colors={Colors.gradients.accent}
+                style={styles.sectionTitleGradient}
+              >
+                <Text style={styles.sectionTitle}>Trending Now</Text>
+              </LinearGradient>
               <View style={styles.trendingGrid}>
-                <TouchableOpacity style={styles.trendingCard}>
+                <TouchableOpacity 
+                  style={styles.trendingCard}
+                  onPress={() => {
+                    handleSearch('Business Growth');
+                    triggerHapticFeedback();
+                  }}
+                >
                   <Image
                     source={{ uri: 'https://images.pexels.com/photos/7191991/pexels-photo-7191991.jpeg?auto=compress&cs=tinysrgb&w=200&h=200' }}
                     style={styles.trendingImage}
                   />
-                  <View style={styles.trendingOverlay}>
+                  <LinearGradient
+                    colors={['transparent', 'rgba(0, 0, 0, 0.8)']}
+                    style={styles.trendingOverlay}
+                  >
                     <Text style={styles.trendingTitle}>Business Growth</Text>
                     <Text style={styles.trendingSubtitle}>125 podcasts</Text>
-                  </View>
+                  </LinearGradient>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.trendingCard}>
+                <TouchableOpacity 
+                  style={styles.trendingCard}
+                  onPress={() => {
+                    handleSearch('Personal Growth');
+                    triggerHapticFeedback();
+                  }}
+                >
                   <Image
                     source={{ uri: 'https://images.pexels.com/photos/7191319/pexels-photo-7191319.jpeg?auto=compress&cs=tinysrgb&w=200&h=200' }}
                     style={styles.trendingImage}
                   />
-                  <View style={styles.trendingOverlay}>
+                  <LinearGradient
+                    colors={['transparent', 'rgba(0, 0, 0, 0.8)']}
+                    style={styles.trendingOverlay}
+                  >
                     <Text style={styles.trendingTitle}>Personal Growth</Text>
                     <Text style={styles.trendingSubtitle}>89 podcasts</Text>
-                  </View>
+                  </LinearGradient>
                 </TouchableOpacity>
               </View>
             </View>
           </View>
         ) : (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Search Results</Text>
+            <LinearGradient
+              colors={Colors.gradients.primary}
+              style={styles.sectionTitleGradient}
+            >
+              <Text style={styles.sectionTitle}>Search Results</Text>
+            </LinearGradient>
             <Text style={styles.resultsCount}>
               {searchResults.length} results for "{searchQuery}"
             </Text>
             {searchResults.map((result) => (
-              <TouchableOpacity key={result.id} style={styles.resultCard}>
+              <TouchableOpacity 
+                key={result.id} 
+                style={styles.resultCard}
+                onPress={() => {
+                  handleResultPress(result);
+                  triggerHapticFeedback();
+                }}
+              >
                 <Image source={{ uri: result.image }} style={styles.resultImage} />
                 <View style={styles.resultInfo}>
                   {result.type === 'podcast' ? (
@@ -142,7 +224,9 @@ export default function SearchScreen() {
                       <Text style={styles.resultTitle}>{result.title}</Text>
                       <Text style={styles.resultHost}>by {result.host}</Text>
                       <View style={styles.resultStats}>
-                        <Text style={styles.category}>{result.category}</Text>
+                        <Text style={[styles.category, { backgroundColor: Colors.primary[900], color: Colors.primary[300] }]}>
+                          {result.category}
+                        </Text>
                         <Text style={styles.followers}>{result.followers} followers</Text>
                       </View>
                     </>
@@ -152,7 +236,7 @@ export default function SearchScreen() {
                       <Text style={styles.resultPodcast}>{result.podcast}</Text>
                       <View style={styles.resultStats}>
                         <View style={styles.statItem}>
-                          <Clock size={12} color="#6B7280" />
+                          <Clock size={12} color={Colors.neutral[500]} />
                           <Text style={styles.duration}>{result.duration}</Text>
                         </View>
                         <Text style={styles.publishedAt}>{result.publishedAt}</Text>
@@ -160,9 +244,37 @@ export default function SearchScreen() {
                     </>
                   )}
                 </View>
-                <TouchableOpacity style={styles.playButton}>
-                  <Play size={20} color="#6366F1" />
-                </TouchableOpacity>
+                <View style={styles.resultActions}>
+                  <TouchableOpacity 
+                    style={[styles.playButton, { borderColor: Colors.primary[500] }]}
+                    onPress={() => {
+                      handleResultPress(result);
+                      triggerHapticFeedback();
+                    }}
+                  >
+                    <Play size={20} color={Colors.primary[500]} />
+                  </TouchableOpacity>
+                  <View style={styles.secondaryActions}>
+                    <TouchableOpacity 
+                      style={styles.secondaryButton}
+                      onPress={() => {
+                        handleLikePress(result);
+                        triggerHapticFeedback();
+                      }}
+                    >
+                      <Heart size={16} color={Colors.neutral[400]} />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.secondaryButton}
+                      onPress={() => {
+                        handleSharePress(result);
+                        triggerHapticFeedback();
+                      }}
+                    >
+                      <Share2 size={16} color={Colors.neutral[400]} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </TouchableOpacity>
             ))}
           </View>
@@ -175,20 +287,27 @@ export default function SearchScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#111827',
+    backgroundColor: Colors.dark.background,
   },
   header: {
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#374151',
+    borderBottomColor: Colors.dark.border,
+  },
+  titleGradient: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+    marginBottom: 20,
+    alignSelf: 'center',
   },
   title: {
     fontFamily: 'Inter-Bold',
-    fontSize: 28,
+    fontSize: 24,
     color: '#FFFFFF',
-    marginBottom: 20,
+    letterSpacing: 1,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -199,11 +318,13 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1F2937',
+    backgroundColor: Colors.dark.card,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
     gap: 12,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
   },
   searchInput: {
     flex: 1,
@@ -215,11 +336,10 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: '#1F2937',
+    backgroundColor: Colors.dark.card,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#6366F1',
   },
   content: {
     flex: 1,
@@ -228,11 +348,17 @@ const styles = StyleSheet.create({
   section: {
     marginTop: 24,
   },
+  sectionTitleGradient: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    marginBottom: 16,
+    alignSelf: 'flex-start',
+  },
   sectionTitle: {
     fontFamily: 'Inter-Bold',
     fontSize: 20,
     color: '#FFFFFF',
-    marginBottom: 16,
   },
   tagsContainer: {
     flexDirection: 'row',
@@ -242,11 +368,11 @@ const styles = StyleSheet.create({
   tag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1F2937',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     gap: 6,
+    borderWidth: 1,
   },
   tagText: {
     fontFamily: 'Inter-Medium',
@@ -275,7 +401,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
   },
   trendingTitle: {
     fontFamily: 'Inter-SemiBold',
@@ -286,21 +411,23 @@ const styles = StyleSheet.create({
   trendingSubtitle: {
     fontFamily: 'Inter-Regular',
     fontSize: 12,
-    color: '#9CA3AF',
+    color: Colors.neutral[300],
   },
   resultsCount: {
     fontFamily: 'Inter-Regular',
     fontSize: 14,
-    color: '#9CA3AF',
+    color: Colors.neutral[400],
     marginBottom: 16,
   },
   resultCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1F2937',
+    backgroundColor: Colors.dark.card,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
   },
   resultImage: {
     width: 60,
@@ -320,13 +447,13 @@ const styles = StyleSheet.create({
   resultHost: {
     fontFamily: 'Inter-Regular',
     fontSize: 14,
-    color: '#9CA3AF',
+    color: Colors.neutral[400],
     marginBottom: 8,
   },
   resultPodcast: {
     fontFamily: 'Inter-Regular',
     fontSize: 14,
-    color: '#9CA3AF',
+    color: Colors.neutral[400],
     marginBottom: 8,
   },
   resultStats: {
@@ -337,8 +464,6 @@ const styles = StyleSheet.create({
   category: {
     fontFamily: 'Inter-Medium',
     fontSize: 12,
-    color: '#6366F1',
-    backgroundColor: '#1E1B4B',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
@@ -346,7 +471,7 @@ const styles = StyleSheet.create({
   followers: {
     fontFamily: 'Inter-Regular',
     fontSize: 12,
-    color: '#9CA3AF',
+    color: Colors.neutral[400],
   },
   statItem: {
     flexDirection: 'row',
@@ -356,22 +481,36 @@ const styles = StyleSheet.create({
   duration: {
     fontFamily: 'Inter-Regular',
     fontSize: 12,
-    color: '#9CA3AF',
+    color: Colors.neutral[400],
   },
   publishedAt: {
     fontFamily: 'Inter-Regular',
     fontSize: 12,
-    color: '#6B7280',
+    color: Colors.neutral[500],
+  },
+  resultActions: {
+    alignItems: 'center',
+    gap: 8,
   },
   playButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#1F2937',
+    backgroundColor: Colors.dark.card,
     borderWidth: 2,
-    borderColor: '#6366F1',
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 12,
+  },
+  secondaryActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  secondaryButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

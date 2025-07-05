@@ -1,12 +1,13 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Settings, CreditCard as Edit3, Mic, Headphones, Calendar, Award, Share2, Bell } from 'lucide-react-native';
+import { Settings, Edit3, Mic, Headphones, Calendar, Award, Share2, Bell, TrendingUp, Users } from 'lucide-react-native';
+import { Colors } from '@/constants/Colors';
 
 const userStats = [
-  { label: 'Episodes Listened', value: '247', icon: Headphones },
-  { label: 'Hours Listened', value: '156', icon: Calendar },
-  { label: 'Podcasts Created', value: '12', icon: Mic },
-  { label: 'Achievements', value: '8', icon: Award },
+  { label: 'Episodes Listened', value: '247', icon: Headphones, color: Colors.primary[500] },
+  { label: 'Hours Listened', value: '156', icon: Calendar, color: Colors.accent.emerald },
+  { label: 'Podcasts Created', value: '12', icon: Mic, color: Colors.accent.orange },
+  { label: 'Achievements', value: '8', icon: Award, color: Colors.accent.amber },
 ];
 
 const achievements = [
@@ -41,17 +42,43 @@ const achievements = [
 ];
 
 const menuItems = [
-  { title: 'Create New Episode', icon: Mic, color: '#6366F1' },
-  { title: 'Analytics Dashboard', icon: Award, color: '#10B981' },
-  { title: 'Notifications', icon: Bell, color: '#F59E0B' },
-  { title: 'Settings', icon: Settings, color: '#6B7280' },
+  { title: 'Create New Episode', icon: Mic, color: Colors.primary[500] },
+  { title: 'Analytics Dashboard', icon: TrendingUp, color: Colors.accent.emerald },
+  { title: 'Notifications', icon: Bell, color: Colors.accent.amber },
+  { title: 'Settings', icon: Settings, color: Colors.neutral[500] },
 ];
 
 export default function ProfileScreen() {
+  const handleEditProfile = () => {
+    console.log('Edit profile pressed');
+    // Navigate to edit profile
+  };
+
+  const handleShareProfile = () => {
+    console.log('Share profile pressed');
+    // Handle share functionality
+  };
+
+  const handleMenuItemPress = (item: any) => {
+    console.log('Menu item pressed:', item.title);
+    // Navigate to respective screen
+  };
+
+  const handleAchievementPress = (achievement: any) => {
+    console.log('Achievement pressed:', achievement.title);
+    // Show achievement details
+  };
+
+  const triggerHapticFeedback = () => {
+    if (Platform.OS === 'web') {
+      console.log('Button pressed');
+    }
+  };
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <LinearGradient
-        colors={['#1F2937', '#111827']}
+        colors={Colors.gradients.dark}
         style={styles.header}
       >
         <View style={styles.profileSection}>
@@ -60,20 +87,32 @@ export default function ProfileScreen() {
               source={{ uri: 'https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=200&h=200' }}
               style={styles.avatar}
             />
-            <TouchableOpacity style={styles.editButton}>
+            <TouchableOpacity 
+              style={[styles.editButton, { backgroundColor: Colors.primary[500] }]}
+              onPress={() => {
+                handleEditProfile();
+                triggerHapticFeedback();
+              }}
+            >
               <Edit3 size={16} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
           <Text style={styles.userName}>Alex Johnson</Text>
-          <Text style={styles.userHandle}>@alexjohnson</Text>
+          <Text style={[styles.userHandle, { color: Colors.primary[400] }]}>@alexjohnson</Text>
           <Text style={styles.userBio}>
             Passionate podcaster sharing insights on entrepreneurship, technology, and personal growth. 
             Host of "Rise & Speak Weekly" 🎙️
           </Text>
           <View style={styles.profileActions}>
-            <TouchableOpacity style={styles.actionButton}>
-              <Share2 size={20} color="#6366F1" />
-              <Text style={styles.actionButtonText}>Share Profile</Text>
+            <TouchableOpacity 
+              style={[styles.actionButton, { borderColor: Colors.primary[500] }]}
+              onPress={() => {
+                handleShareProfile();
+                triggerHapticFeedback();
+              }}
+            >
+              <Share2 size={20} color={Colors.primary[500]} />
+              <Text style={[styles.actionButtonText, { color: Colors.primary[500] }]}>Share Profile</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -82,33 +121,55 @@ export default function ProfileScreen() {
       <View style={styles.content}>
         {/* Stats Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Your Stats</Text>
+          <LinearGradient
+            colors={Colors.gradients.primary}
+            style={styles.sectionTitleGradient}
+          >
+            <Text style={styles.sectionTitle}>Your Stats</Text>
+          </LinearGradient>
           <View style={styles.statsGrid}>
             {userStats.map((stat, index) => (
-              <View key={index} style={styles.statCard}>
-                <View style={styles.statIcon}>
-                  <stat.icon size={24} color="#6366F1" />
+              <TouchableOpacity 
+                key={index} 
+                style={[styles.statCard, { backgroundColor: Colors.dark.card, borderColor: Colors.dark.border }]}
+                onPress={() => {
+                  console.log('Stat pressed:', stat.label);
+                  triggerHapticFeedback();
+                }}
+              >
+                <View style={[styles.statIcon, { backgroundColor: stat.color + '20' }]}>
+                  <stat.icon size={24} color={stat.color} />
                 </View>
                 <Text style={styles.statValue}>{stat.value}</Text>
                 <Text style={styles.statLabel}>{stat.label}</Text>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         </View>
 
         {/* Achievements Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Achievements</Text>
+          <LinearGradient
+            colors={Colors.gradients.secondary}
+            style={styles.sectionTitleGradient}
+          >
+            <Text style={styles.sectionTitle}>Achievements</Text>
+          </LinearGradient>
           <View style={styles.achievementsGrid}>
             {achievements.map((achievement) => (
               <TouchableOpacity
                 key={achievement.id}
                 style={[
                   styles.achievementCard,
+                  { backgroundColor: Colors.dark.card, borderColor: Colors.dark.border },
                   !achievement.unlocked && styles.lockedAchievement
                 ]}
+                onPress={() => {
+                  handleAchievementPress(achievement);
+                  triggerHapticFeedback();
+                }}
               >
-                <View style={styles.achievementIcon}>
+                <View style={[styles.achievementIcon, { backgroundColor: Colors.neutral[700] }]}>
                   <Text style={styles.achievementEmoji}>{achievement.icon}</Text>
                 </View>
                 <Text style={[
@@ -124,7 +185,7 @@ export default function ProfileScreen() {
                   {achievement.description}
                 </Text>
                 {achievement.unlocked && (
-                  <View style={styles.unlockedBadge}>
+                  <View style={[styles.unlockedBadge, { backgroundColor: Colors.accent.emerald }]}>
                     <Text style={styles.unlockedText}>Unlocked</Text>
                   </View>
                 )}
@@ -135,10 +196,22 @@ export default function ProfileScreen() {
 
         {/* Quick Actions */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <LinearGradient
+            colors={Colors.gradients.accent}
+            style={styles.sectionTitleGradient}
+          >
+            <Text style={styles.sectionTitle}>Quick Actions</Text>
+          </LinearGradient>
           <View style={styles.menuGrid}>
             {menuItems.map((item, index) => (
-              <TouchableOpacity key={index} style={styles.menuItem}>
+              <TouchableOpacity 
+                key={index} 
+                style={[styles.menuItem, { backgroundColor: Colors.dark.card, borderColor: Colors.dark.border }]}
+                onPress={() => {
+                  handleMenuItemPress(item);
+                  triggerHapticFeedback();
+                }}
+              >
                 <View style={[styles.menuIcon, { backgroundColor: item.color + '20' }]}>
                   <item.icon size={24} color={item.color} />
                 </View>
@@ -150,11 +223,22 @@ export default function ProfileScreen() {
 
         {/* Recent Activity */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
+          <LinearGradient
+            colors={[Colors.accent.emerald, Colors.primary[500]]}
+            style={styles.sectionTitleGradient}
+          >
+            <Text style={styles.sectionTitle}>Recent Activity</Text>
+          </LinearGradient>
           <View style={styles.activityList}>
-            <View style={styles.activityItem}>
-              <View style={styles.activityIcon}>
-                <Mic size={20} color="#6366F1" />
+            <TouchableOpacity 
+              style={[styles.activityItem, { backgroundColor: Colors.dark.card, borderColor: Colors.dark.border }]}
+              onPress={() => {
+                console.log('Activity item pressed');
+                triggerHapticFeedback();
+              }}
+            >
+              <View style={[styles.activityIcon, { backgroundColor: Colors.primary[900] }]}>
+                <Mic size={20} color={Colors.primary[400]} />
               </View>
               <View style={styles.activityContent}>
                 <Text style={styles.activityTitle}>Published new episode</Text>
@@ -163,10 +247,16 @@ export default function ProfileScreen() {
                 </Text>
                 <Text style={styles.activityTime}>2 hours ago</Text>
               </View>
-            </View>
-            <View style={styles.activityItem}>
-              <View style={styles.activityIcon}>
-                <Award size={20} color="#10B981" />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.activityItem, { backgroundColor: Colors.dark.card, borderColor: Colors.dark.border }]}
+              onPress={() => {
+                console.log('Activity item pressed');
+                triggerHapticFeedback();
+              }}
+            >
+              <View style={[styles.activityIcon, { backgroundColor: Colors.accent.emerald + '20' }]}>
+                <Award size={20} color={Colors.accent.emerald} />
               </View>
               <View style={styles.activityContent}>
                 <Text style={styles.activityTitle}>Achievement unlocked</Text>
@@ -175,10 +265,16 @@ export default function ProfileScreen() {
                 </Text>
                 <Text style={styles.activityTime}>1 day ago</Text>
               </View>
-            </View>
-            <View style={styles.activityItem}>
-              <View style={styles.activityIcon}>
-                <Headphones size={20} color="#F59E0B" />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.activityItem, { backgroundColor: Colors.dark.card, borderColor: Colors.dark.border }]}
+              onPress={() => {
+                console.log('Activity item pressed');
+                triggerHapticFeedback();
+              }}
+            >
+              <View style={[styles.activityIcon, { backgroundColor: Colors.accent.amber + '20' }]}>
+                <Headphones size={20} color={Colors.accent.amber} />
               </View>
               <View style={styles.activityContent}>
                 <Text style={styles.activityTitle}>Listened to episode</Text>
@@ -187,7 +283,7 @@ export default function ProfileScreen() {
                 </Text>
                 <Text style={styles.activityTime}>2 days ago</Text>
               </View>
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -198,7 +294,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#111827',
+    backgroundColor: Colors.dark.background,
   },
   header: {
     paddingTop: 60,
@@ -217,7 +313,7 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     borderWidth: 3,
-    borderColor: '#6366F1',
+    borderColor: Colors.primary[500],
   },
   editButton: {
     position: 'absolute',
@@ -226,11 +322,10 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#6366F1',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#1F2937',
+    borderColor: Colors.dark.card,
   },
   userName: {
     fontFamily: 'Inter-Bold',
@@ -241,13 +336,12 @@ const styles = StyleSheet.create({
   userHandle: {
     fontFamily: 'Inter-Regular',
     fontSize: 16,
-    color: '#9CA3AF',
     marginBottom: 12,
   },
   userBio: {
     fontFamily: 'Inter-Regular',
     fontSize: 14,
-    color: '#D1D5DB',
+    color: Colors.neutral[300],
     textAlign: 'center',
     lineHeight: 20,
     marginBottom: 20,
@@ -259,18 +353,16 @@ const styles = StyleSheet.create({
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1F2937',
+    backgroundColor: Colors.dark.card,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: '#6366F1',
     gap: 8,
   },
   actionButtonText: {
     fontFamily: 'Inter-Medium',
     fontSize: 14,
-    color: '#6366F1',
   },
   content: {
     paddingHorizontal: 20,
@@ -278,11 +370,17 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 32,
   },
+  sectionTitleGradient: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    marginBottom: 16,
+    alignSelf: 'flex-start',
+  },
   sectionTitle: {
     fontFamily: 'Inter-Bold',
     fontSize: 20,
     color: '#FFFFFF',
-    marginBottom: 16,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -291,16 +389,15 @@ const styles = StyleSheet.create({
   },
   statCard: {
     width: '48%',
-    backgroundColor: '#1F2937',
     borderRadius: 16,
     padding: 16,
     alignItems: 'center',
+    borderWidth: 1,
   },
   statIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#1E1B4B',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -314,7 +411,7 @@ const styles = StyleSheet.create({
   statLabel: {
     fontFamily: 'Inter-Regular',
     fontSize: 12,
-    color: '#9CA3AF',
+    color: Colors.neutral[400],
     textAlign: 'center',
   },
   achievementsGrid: {
@@ -324,10 +421,10 @@ const styles = StyleSheet.create({
   },
   achievementCard: {
     width: '48%',
-    backgroundColor: '#1F2937',
     borderRadius: 16,
     padding: 16,
     alignItems: 'center',
+    borderWidth: 1,
   },
   lockedAchievement: {
     opacity: 0.5,
@@ -336,7 +433,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#374151',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -354,15 +450,14 @@ const styles = StyleSheet.create({
   achievementDescription: {
     fontFamily: 'Inter-Regular',
     fontSize: 12,
-    color: '#9CA3AF',
+    color: Colors.neutral[400],
     textAlign: 'center',
     lineHeight: 16,
   },
   lockedText: {
-    color: '#6B7280',
+    color: Colors.neutral[500],
   },
   unlockedBadge: {
-    backgroundColor: '#10B981',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
@@ -380,10 +475,10 @@ const styles = StyleSheet.create({
   },
   menuItem: {
     width: '48%',
-    backgroundColor: '#1F2937',
     borderRadius: 16,
     padding: 16,
     alignItems: 'center',
+    borderWidth: 1,
   },
   menuIcon: {
     width: 48,
@@ -405,15 +500,14 @@ const styles = StyleSheet.create({
   activityItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#1F2937',
     borderRadius: 16,
     padding: 16,
+    borderWidth: 1,
   },
   activityIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#374151',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -430,12 +524,12 @@ const styles = StyleSheet.create({
   activityDescription: {
     fontFamily: 'Inter-Regular',
     fontSize: 14,
-    color: '#9CA3AF',
+    color: Colors.neutral[400],
     marginBottom: 4,
   },
   activityTime: {
     fontFamily: 'Inter-Regular',
     fontSize: 12,
-    color: '#6B7280',
+    color: Colors.neutral[500],
   },
 });

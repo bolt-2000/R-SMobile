@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Dimensions, Platform } from 'react-native';
 import { useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -20,6 +20,7 @@ import {
   Twitter,
   Apple
 } from 'lucide-react-native';
+import { Colors } from '@/constants/Colors';
 
 const { width } = Dimensions.get('window');
 
@@ -48,12 +49,12 @@ export default function AuthScreen() {
   }));
 
   const handleAuth = () => {
+    console.log('Authentication:', isLogin ? 'Login' : 'Register');
     // Navigate to main app
     router.replace('/(tabs)');
   };
 
   const handleSocialAuth = (provider: string) => {
-    // Handle social authentication
     console.log(`Authenticating with ${provider}`);
     router.replace('/(tabs)');
   };
@@ -65,10 +66,16 @@ export default function AuthScreen() {
     setName('');
   };
 
+  const triggerHapticFeedback = () => {
+    if (Platform.OS === 'web') {
+      console.log('Button pressed');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#0F0F23', '#1A1A3A', '#2D1B69']}
+        colors={Colors.gradients.dark}
         style={styles.gradient}
       >
         <ScrollView 
@@ -80,21 +87,29 @@ export default function AuthScreen() {
           <View style={styles.header}>
             <TouchableOpacity 
               style={styles.backButton}
-              onPress={() => router.back()}
+              onPress={() => {
+                router.back();
+                triggerHapticFeedback();
+              }}
             >
               <ArrowLeft size={24} color="#FFFFFF" />
             </TouchableOpacity>
             
             <View style={styles.logoSection}>
               <LinearGradient
-                colors={['#6366F1', '#8B5CF6']}
+                colors={Colors.gradients.primary}
                 style={styles.miniLogo}
               >
                 <Text style={styles.logoText}>R&S</Text>
               </LinearGradient>
-              <Text style={styles.welcomeText}>
-                {isLogin ? 'Welcome Back!' : 'Join RISE & SPEAK'}
-              </Text>
+              <LinearGradient
+                colors={Colors.gradients.primary}
+                style={styles.welcomeGradient}
+              >
+                <Text style={styles.welcomeText}>
+                  {isLogin ? 'Welcome Back!' : 'Join RISE & SPEAK'}
+                </Text>
+              </LinearGradient>
               <Text style={styles.subtitleText}>
                 {isLogin 
                   ? 'Sign in to continue your podcast journey' 
@@ -106,16 +121,16 @@ export default function AuthScreen() {
 
           {/* Auth Form */}
           <Animated.View style={[styles.formContainer, formAnimatedStyle]}>
-            <View style={styles.formCard}>
+            <View style={[styles.formCard, { backgroundColor: Colors.dark.card, borderColor: Colors.dark.border }]}>
               {!isLogin && (
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Full Name</Text>
-                  <View style={styles.inputContainer}>
-                    <User size={20} color="#9CA3AF" />
+                  <View style={[styles.inputContainer, { backgroundColor: Colors.dark.surface, borderColor: Colors.dark.border }]}>
+                    <User size={20} color={Colors.neutral[400]} />
                     <TextInput
                       style={styles.textInput}
                       placeholder="Enter your full name"
-                      placeholderTextColor="#6B7280"
+                      placeholderTextColor={Colors.neutral[500]}
                       value={name}
                       onChangeText={setName}
                     />
@@ -125,12 +140,12 @@ export default function AuthScreen() {
 
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Email Address</Text>
-                <View style={styles.inputContainer}>
-                  <Mail size={20} color="#9CA3AF" />
+                <View style={[styles.inputContainer, { backgroundColor: Colors.dark.surface, borderColor: Colors.dark.border }]}>
+                  <Mail size={20} color={Colors.neutral[400]} />
                   <TextInput
                     style={styles.textInput}
                     placeholder="Enter your email"
-                    placeholderTextColor="#6B7280"
+                    placeholderTextColor={Colors.neutral[500]}
                     value={email}
                     onChangeText={setEmail}
                     keyboardType="email-address"
@@ -141,35 +156,47 @@ export default function AuthScreen() {
 
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Password</Text>
-                <View style={styles.inputContainer}>
-                  <Lock size={20} color="#9CA3AF" />
+                <View style={[styles.inputContainer, { backgroundColor: Colors.dark.surface, borderColor: Colors.dark.border }]}>
+                  <Lock size={20} color={Colors.neutral[400]} />
                   <TextInput
                     style={styles.textInput}
                     placeholder="Enter your password"
-                    placeholderTextColor="#6B7280"
+                    placeholderTextColor={Colors.neutral[500]}
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry={!showPassword}
                   />
                   <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                     {showPassword ? (
-                      <EyeOff size={20} color="#9CA3AF" />
+                      <EyeOff size={20} color={Colors.neutral[400]} />
                     ) : (
-                      <Eye size={20} color="#9CA3AF" />
+                      <Eye size={20} color={Colors.neutral[400]} />
                     )}
                   </TouchableOpacity>
                 </View>
               </View>
 
               {isLogin && (
-                <TouchableOpacity style={styles.forgotPassword}>
-                  <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+                <TouchableOpacity 
+                  style={styles.forgotPassword}
+                  onPress={() => {
+                    console.log('Forgot password pressed');
+                    triggerHapticFeedback();
+                  }}
+                >
+                  <Text style={[styles.forgotPasswordText, { color: Colors.secondary[400] }]}>Forgot Password?</Text>
                 </TouchableOpacity>
               )}
 
-              <TouchableOpacity style={styles.authButton} onPress={handleAuth}>
+              <TouchableOpacity 
+                style={styles.authButton} 
+                onPress={() => {
+                  handleAuth();
+                  triggerHapticFeedback();
+                }}
+              >
                 <LinearGradient
-                  colors={['#6366F1', '#8B5CF6']}
+                  colors={Colors.gradients.primary}
                   style={styles.authButtonGradient}
                 >
                   <Text style={styles.authButtonText}>
@@ -178,10 +205,16 @@ export default function AuthScreen() {
                 </LinearGradient>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.toggleAuth} onPress={toggleAuthMode}>
+              <TouchableOpacity 
+                style={styles.toggleAuth} 
+                onPress={() => {
+                  toggleAuthMode();
+                  triggerHapticFeedback();
+                }}
+              >
                 <Text style={styles.toggleAuthText}>
                   {isLogin ? "Don't have an account? " : "Already have an account? "}
-                  <Text style={styles.toggleAuthLink}>
+                  <Text style={[styles.toggleAuthLink, { color: Colors.secondary[400] }]}>
                     {isLogin ? 'Sign Up' : 'Sign In'}
                   </Text>
                 </Text>
@@ -192,39 +225,51 @@ export default function AuthScreen() {
           {/* Social Authentication */}
           <Animated.View style={[styles.socialContainer, socialAnimatedStyle]}>
             <View style={styles.divider}>
-              <View style={styles.dividerLine} />
+              <View style={[styles.dividerLine, { backgroundColor: Colors.dark.border }]} />
               <Text style={styles.dividerText}>Or continue with</Text>
-              <View style={styles.dividerLine} />
+              <View style={[styles.dividerLine, { backgroundColor: Colors.dark.border }]} />
             </View>
 
             <View style={styles.socialButtons}>
               <TouchableOpacity 
-                style={styles.socialButton}
-                onPress={() => handleSocialAuth('Google')}
+                style={[styles.socialButton, { backgroundColor: Colors.dark.card, borderColor: Colors.dark.border }]}
+                onPress={() => {
+                  handleSocialAuth('Google');
+                  triggerHapticFeedback();
+                }}
               >
                 <Chrome size={24} color="#FFFFFF" />
                 <Text style={styles.socialButtonText}>Google</Text>
               </TouchableOpacity>
 
               <TouchableOpacity 
-                style={styles.socialButton}
-                onPress={() => handleSocialAuth('Facebook')}
+                style={[styles.socialButton, { backgroundColor: Colors.dark.card, borderColor: Colors.dark.border }]}
+                onPress={() => {
+                  handleSocialAuth('Facebook');
+                  triggerHapticFeedback();
+                }}
               >
                 <Facebook size={24} color="#FFFFFF" />
                 <Text style={styles.socialButtonText}>Facebook</Text>
               </TouchableOpacity>
 
               <TouchableOpacity 
-                style={styles.socialButton}
-                onPress={() => handleSocialAuth('Twitter')}
+                style={[styles.socialButton, { backgroundColor: Colors.dark.card, borderColor: Colors.dark.border }]}
+                onPress={() => {
+                  handleSocialAuth('Twitter');
+                  triggerHapticFeedback();
+                }}
               >
                 <Twitter size={24} color="#FFFFFF" />
                 <Text style={styles.socialButtonText}>Twitter</Text>
               </TouchableOpacity>
 
               <TouchableOpacity 
-                style={styles.socialButton}
-                onPress={() => handleSocialAuth('Apple')}
+                style={[styles.socialButton, { backgroundColor: Colors.dark.card, borderColor: Colors.dark.border }]}
+                onPress={() => {
+                  handleSocialAuth('Apple');
+                  triggerHapticFeedback();
+                }}
               >
                 <Apple size={24} color="#FFFFFF" />
                 <Text style={styles.socialButtonText}>Apple</Text>
@@ -236,9 +281,9 @@ export default function AuthScreen() {
           <View style={styles.termsContainer}>
             <Text style={styles.termsText}>
               By continuing, you agree to our{' '}
-              <Text style={styles.termsLink}>Terms of Service</Text>
+              <Text style={[styles.termsLink, { color: Colors.secondary[400] }]}>Terms of Service</Text>
               {' '}and{' '}
-              <Text style={styles.termsLink}>Privacy Policy</Text>
+              <Text style={[styles.termsLink, { color: Colors.secondary[400] }]}>Privacy Policy</Text>
             </Text>
           </View>
         </ScrollView>
@@ -291,17 +336,22 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#FFFFFF',
   },
+  welcomeGradient: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+    marginBottom: 8,
+  },
   welcomeText: {
     fontFamily: 'Inter-Bold',
     fontSize: 28,
     color: '#FFFFFF',
     textAlign: 'center',
-    marginBottom: 8,
   },
   subtitleText: {
     fontFamily: 'Inter-Regular',
     fontSize: 16,
-    color: '#9CA3AF',
+    color: Colors.neutral[400],
     textAlign: 'center',
   },
   formContainer: {
@@ -309,11 +359,9 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   formCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 24,
     padding: 24,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   inputGroup: {
     marginBottom: 20,
@@ -327,12 +375,10 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
     gap: 12,
   },
   textInput: {
@@ -348,7 +394,6 @@ const styles = StyleSheet.create({
   forgotPasswordText: {
     fontFamily: 'Inter-Medium',
     fontSize: 14,
-    color: '#8B5CF6',
   },
   authButton: {
     marginBottom: 20,
@@ -369,10 +414,9 @@ const styles = StyleSheet.create({
   toggleAuthText: {
     fontFamily: 'Inter-Regular',
     fontSize: 14,
-    color: '#9CA3AF',
+    color: Colors.neutral[400],
   },
   toggleAuthLink: {
-    color: '#8B5CF6',
     fontFamily: 'Inter-SemiBold',
   },
   socialContainer: {
@@ -387,12 +431,11 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   dividerText: {
     fontFamily: 'Inter-Regular',
     fontSize: 14,
-    color: '#9CA3AF',
+    color: Colors.neutral[400],
     marginHorizontal: 16,
   },
   socialButtons: {
@@ -406,12 +449,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
     gap: 8,
   },
   socialButtonText: {
@@ -426,12 +467,11 @@ const styles = StyleSheet.create({
   termsText: {
     fontFamily: 'Inter-Regular',
     fontSize: 12,
-    color: '#6B7280',
+    color: Colors.neutral[500],
     textAlign: 'center',
     lineHeight: 18,
   },
   termsLink: {
-    color: '#8B5CF6',
     fontFamily: 'Inter-Medium',
   },
 });

@@ -1,6 +1,7 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { TrendingUp, Clock, Star, Play, Video, Users, Calendar } from 'lucide-react-native';
+import { TrendingUp, Clock, Star, Play, Video, Users, Calendar, Heart, Share2, Bookmark } from 'lucide-react-native';
+import { Colors } from '@/constants/Colors';
 
 const { width } = Dimensions.get('window');
 
@@ -63,10 +64,10 @@ const liveShows = [
 ];
 
 const categories = [
-  { name: 'Business', color: '#6366F1', icon: TrendingUp },
-  { name: 'Personal Growth', color: '#F97316', icon: Star },
-  { name: 'Technology', color: '#10B981', icon: TrendingUp },
-  { name: 'Health', color: '#EF4444', icon: Star },
+  { name: 'Business', color: Colors.primary[500], icon: TrendingUp },
+  { name: 'Personal Growth', color: Colors.accent.orange, icon: Star },
+  { name: 'Technology', color: Colors.accent.emerald, icon: TrendingUp },
+  { name: 'Health', color: Colors.accent.red, icon: Star },
 ];
 
 const recentEpisodes = [
@@ -103,22 +104,72 @@ const recentEpisodes = [
 ];
 
 export default function HomeScreen() {
+  const handlePodcastPress = (podcast: any) => {
+    console.log('Playing podcast:', podcast.title);
+    // Navigate to player or handle podcast selection
+  };
+
+  const handleLiveShowPress = (show: any) => {
+    console.log('Joining live show:', show.title);
+    // Navigate to live show
+  };
+
+  const handleCategoryPress = (category: any) => {
+    console.log('Browsing category:', category.name);
+    // Navigate to category view
+  };
+
+  const handleEpisodePress = (episode: any) => {
+    console.log('Playing episode:', episode.title);
+    // Navigate to episode player
+  };
+
+  const handleLikePress = (item: any) => {
+    console.log('Liked:', item.title);
+    // Handle like functionality
+  };
+
+  const handleSharePress = (item: any) => {
+    console.log('Sharing:', item.title);
+    // Handle share functionality
+  };
+
+  const handleBookmarkPress = (item: any) => {
+    console.log('Bookmarked:', item.title);
+    // Handle bookmark functionality
+  };
+
+  const triggerHapticFeedback = () => {
+    if (Platform.OS === 'web') {
+      // Visual feedback for web
+      console.log('Button pressed');
+    }
+  };
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <LinearGradient
-        colors={['#1F2937', '#111827']}
+        colors={Colors.gradients.dark}
         style={styles.header}
       >
         <View style={styles.headerContent}>
           <Text style={styles.greeting}>Good Morning!</Text>
-          <Text style={styles.title}>Ready to Rise & Speak?</Text>
+          <View style={styles.brandContainer}>
+            <LinearGradient
+              colors={Colors.gradients.primary}
+              style={styles.brandGradient}
+            >
+              <Text style={styles.title}>RISE & SPEAK</Text>
+            </LinearGradient>
+          </View>
+          <Text style={styles.subtitle}>Ready to Rise & Speak?</Text>
           <View style={styles.headerStats}>
             <View style={styles.statItem}>
-              <Users size={16} color="#6366F1" />
+              <Users size={16} color={Colors.primary[400]} />
               <Text style={styles.statText}>2.5M+ Viewers</Text>
             </View>
             <View style={styles.statItem}>
-              <Video size={16} color="#10B981" />
+              <Video size={16} color={Colors.accent.emerald} />
               <Text style={styles.statText}>Live Shows Daily</Text>
             </View>
           </View>
@@ -129,17 +180,29 @@ export default function HomeScreen() {
         {/* Live Shows */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>🔴 Live Now</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See All</Text>
+            <LinearGradient
+              colors={[Colors.live, Colors.accent.orange]}
+              style={styles.liveTitleGradient}
+            >
+              <Text style={styles.sectionTitle}>🔴 Live Now</Text>
+            </LinearGradient>
+            <TouchableOpacity onPress={() => console.log('See all live shows')}>
+              <Text style={[styles.seeAllText, { color: Colors.primary[400] }]}>See All</Text>
             </TouchableOpacity>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
             {liveShows.map((show) => (
-              <TouchableOpacity key={show.id} style={styles.liveCard}>
+              <TouchableOpacity 
+                key={show.id} 
+                style={styles.liveCard}
+                onPress={() => {
+                  handleLiveShowPress(show);
+                  triggerHapticFeedback();
+                }}
+              >
                 <Image source={{ uri: show.image }} style={styles.liveImage} />
                 <View style={styles.liveOverlay}>
-                  <View style={styles.liveIndicator}>
+                  <View style={[styles.liveIndicator, { backgroundColor: Colors.live }]}>
                     <View style={styles.liveDot} />
                     <Text style={styles.liveText}>LIVE</Text>
                   </View>
@@ -160,17 +223,29 @@ export default function HomeScreen() {
 
         {/* Featured Podcasts */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Featured Video Podcasts</Text>
+          <LinearGradient
+            colors={Colors.gradients.primary}
+            style={styles.sectionTitleGradient}
+          >
+            <Text style={styles.sectionTitle}>Featured Video Podcasts</Text>
+          </LinearGradient>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalScroll}>
             {featuredPodcasts.map((podcast) => (
-              <TouchableOpacity key={podcast.id} style={styles.podcastCard}>
+              <TouchableOpacity 
+                key={podcast.id} 
+                style={styles.podcastCard}
+                onPress={() => {
+                  handlePodcastPress(podcast);
+                  triggerHapticFeedback();
+                }}
+              >
                 <View style={styles.imageContainer}>
                   <Image source={{ uri: podcast.image }} style={styles.podcastImage} />
                   <View style={styles.videoIndicator}>
                     <Video size={16} color="#FFFFFF" />
                   </View>
                   {podcast.isLive && (
-                    <View style={styles.liveIndicator}>
+                    <View style={[styles.liveIndicator, { backgroundColor: Colors.live }]}>
                       <View style={styles.liveDot} />
                       <Text style={styles.liveText}>LIVE</Text>
                     </View>
@@ -178,17 +253,39 @@ export default function HomeScreen() {
                   <View style={styles.durationBadge}>
                     <Text style={styles.durationText}>{podcast.duration}</Text>
                   </View>
+                  
+                  {/* Action buttons overlay */}
+                  <View style={styles.actionOverlay}>
+                    <TouchableOpacity 
+                      style={styles.actionButton}
+                      onPress={() => {
+                        handleLikePress(podcast);
+                        triggerHapticFeedback();
+                      }}
+                    >
+                      <Heart size={16} color="#FFFFFF" />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.actionButton}
+                      onPress={() => {
+                        handleBookmarkPress(podcast);
+                        triggerHapticFeedback();
+                      }}
+                    >
+                      <Bookmark size={16} color="#FFFFFF" />
+                    </TouchableOpacity>
+                  </View>
                 </View>
                 <View style={styles.podcastInfo}>
                   <Text style={styles.podcastTitle}>{podcast.title}</Text>
                   <Text style={styles.podcastHost}>by {podcast.host}</Text>
                   <View style={styles.podcastStats}>
                     <View style={styles.statItem}>
-                      <Star size={12} color="#F59E0B" />
+                      <Star size={12} color={Colors.accent.amber} />
                       <Text style={styles.statText}>{podcast.rating}</Text>
                     </View>
                     <View style={styles.statItem}>
-                      <TrendingUp size={12} color="#6B7280" />
+                      <TrendingUp size={12} color={Colors.neutral[400]} />
                       <Text style={styles.statText}>{podcast.listeners}</Text>
                     </View>
                   </View>
@@ -200,10 +297,22 @@ export default function HomeScreen() {
 
         {/* Categories */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Browse Categories</Text>
+          <LinearGradient
+            colors={Colors.gradients.secondary}
+            style={styles.sectionTitleGradient}
+          >
+            <Text style={styles.sectionTitle}>Browse Categories</Text>
+          </LinearGradient>
           <View style={styles.categoriesGrid}>
             {categories.map((category, index) => (
-              <TouchableOpacity key={index} style={styles.categoryCard}>
+              <TouchableOpacity 
+                key={index} 
+                style={styles.categoryCard}
+                onPress={() => {
+                  handleCategoryPress(category);
+                  triggerHapticFeedback();
+                }}
+              >
                 <LinearGradient
                   colors={[category.color, category.color + '80']}
                   style={styles.categoryGradient}
@@ -218,9 +327,21 @@ export default function HomeScreen() {
 
         {/* Recent Episodes */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Video Episodes</Text>
+          <LinearGradient
+            colors={Colors.gradients.accent}
+            style={styles.sectionTitleGradient}
+          >
+            <Text style={styles.sectionTitle}>Recent Video Episodes</Text>
+          </LinearGradient>
           {recentEpisodes.map((episode) => (
-            <TouchableOpacity key={episode.id} style={styles.episodeCard}>
+            <TouchableOpacity 
+              key={episode.id} 
+              style={styles.episodeCard}
+              onPress={() => {
+                handleEpisodePress(episode);
+                triggerHapticFeedback();
+              }}
+            >
               <View style={styles.episodeImageContainer}>
                 <Image source={{ uri: episode.image }} style={styles.episodeImage} />
                 <View style={styles.videoIndicator}>
@@ -232,19 +353,36 @@ export default function HomeScreen() {
                 <Text style={styles.episodePodcast}>{episode.podcast}</Text>
                 <View style={styles.episodeStats}>
                   <View style={styles.statItem}>
-                    <Clock size={12} color="#6B7280" />
+                    <Clock size={12} color={Colors.neutral[400]} />
                     <Text style={styles.statText}>{episode.duration}</Text>
                   </View>
                   <View style={styles.statItem}>
-                    <Users size={12} color="#6B7280" />
+                    <Users size={12} color={Colors.neutral[400]} />
                     <Text style={styles.statText}>{episode.views} views</Text>
                   </View>
                   <Text style={styles.publishedAt}>{episode.publishedAt}</Text>
                 </View>
               </View>
-              <TouchableOpacity style={styles.playButton}>
-                <Play size={20} color="#6366F1" />
-              </TouchableOpacity>
+              <View style={styles.episodeActions}>
+                <TouchableOpacity 
+                  style={[styles.playButton, { borderColor: Colors.primary[500] }]}
+                  onPress={() => {
+                    handleEpisodePress(episode);
+                    triggerHapticFeedback();
+                  }}
+                >
+                  <Play size={20} color={Colors.primary[500]} />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.secondaryButton}
+                  onPress={() => {
+                    handleSharePress(episode);
+                    triggerHapticFeedback();
+                  }}
+                >
+                  <Share2 size={16} color={Colors.neutral[400]} />
+                </TouchableOpacity>
+              </View>
             </TouchableOpacity>
           ))}
         </View>
@@ -256,7 +394,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#111827',
+    backgroundColor: Colors.dark.background,
   },
   header: {
     paddingTop: 60,
@@ -269,13 +407,28 @@ const styles = StyleSheet.create({
   greeting: {
     fontFamily: 'Inter-Medium',
     fontSize: 16,
-    color: '#9CA3AF',
+    color: Colors.neutral[400],
     marginBottom: 8,
+  },
+  brandContainer: {
+    marginBottom: 8,
+  },
+  brandGradient: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 16,
   },
   title: {
     fontFamily: 'Inter-Bold',
     fontSize: 28,
     color: '#FFFFFF',
+    textAlign: 'center',
+    letterSpacing: 2,
+  },
+  subtitle: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 16,
+    color: Colors.neutral[300],
     textAlign: 'center',
     marginBottom: 16,
   },
@@ -291,7 +444,7 @@ const styles = StyleSheet.create({
   statText: {
     fontFamily: 'Inter-Medium',
     fontSize: 12,
-    color: '#9CA3AF',
+    color: Colors.neutral[400],
   },
   content: {
     paddingHorizontal: 20,
@@ -305,6 +458,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
+  sectionTitleGradient: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  liveTitleGradient: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
   sectionTitle: {
     fontFamily: 'Inter-Bold',
     fontSize: 20,
@@ -313,7 +477,6 @@ const styles = StyleSheet.create({
   seeAllText: {
     fontFamily: 'Inter-Medium',
     fontSize: 14,
-    color: '#6366F1',
   },
   horizontalScroll: {
     marginHorizontal: -20,
@@ -322,9 +485,11 @@ const styles = StyleSheet.create({
   liveCard: {
     width: 180,
     marginRight: 16,
-    backgroundColor: '#1F2937',
+    backgroundColor: Colors.dark.card,
     borderRadius: 16,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
   },
   liveImage: {
     width: '100%',
@@ -343,7 +508,6 @@ const styles = StyleSheet.create({
   liveIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EF4444',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
@@ -386,20 +550,22 @@ const styles = StyleSheet.create({
   liveHost: {
     fontFamily: 'Inter-Regular',
     fontSize: 12,
-    color: '#9CA3AF',
+    color: Colors.neutral[400],
     marginBottom: 4,
   },
   liveTime: {
     fontFamily: 'Inter-Regular',
     fontSize: 11,
-    color: '#6B7280',
+    color: Colors.neutral[500],
   },
   podcastCard: {
     width: 200,
     marginRight: 16,
-    backgroundColor: '#1F2937',
+    backgroundColor: Colors.dark.card,
     borderRadius: 16,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
   },
   imageContainer: {
     position: 'relative',
@@ -431,6 +597,21 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#FFFFFF',
   },
+  actionOverlay: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    flexDirection: 'column',
+    gap: 8,
+  },
+  actionButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   podcastInfo: {
     padding: 16,
   },
@@ -443,7 +624,7 @@ const styles = StyleSheet.create({
   podcastHost: {
     fontFamily: 'Inter-Regular',
     fontSize: 14,
-    color: '#9CA3AF',
+    color: Colors.neutral[400],
     marginBottom: 12,
   },
   podcastStats: {
@@ -476,10 +657,12 @@ const styles = StyleSheet.create({
   episodeCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1F2937',
+    backgroundColor: Colors.dark.card,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
   },
   episodeImageContainer: {
     position: 'relative',
@@ -502,7 +685,7 @@ const styles = StyleSheet.create({
   episodePodcast: {
     fontFamily: 'Inter-Regular',
     fontSize: 14,
-    color: '#9CA3AF',
+    color: Colors.neutral[400],
     marginBottom: 8,
   },
   episodeStats: {
@@ -513,17 +696,28 @@ const styles = StyleSheet.create({
   publishedAt: {
     fontFamily: 'Inter-Regular',
     fontSize: 12,
-    color: '#6B7280',
+    color: Colors.neutral[500],
+  },
+  episodeActions: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 8,
   },
   playButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#1F2937',
+    backgroundColor: Colors.dark.card,
     borderWidth: 2,
-    borderColor: '#6366F1',
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 12,
+  },
+  secondaryButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
