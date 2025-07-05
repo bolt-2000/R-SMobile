@@ -11,7 +11,7 @@ import Animated, {
   withTiming,
   withRepeat,
   interpolate,
-  Easing as ReanimatedEasing,
+  Easing,
   runOnJS
 } from 'react-native-reanimated';
 import { Mic, Play, Volume2, Radio, Waves } from 'lucide-react-native';
@@ -45,7 +45,7 @@ export default function SplashScreen() {
     
     logoOpacity.value = withTiming(1, { 
       duration: 1200,
-      easing: ReanimatedEasing.out(ReanimatedEasing.cubic)
+      easing: Easing.out(Easing.cubic)
     });
 
     // Subtle rotation on entrance
@@ -57,7 +57,7 @@ export default function SplashScreen() {
     // Text fade in with stagger
     textOpacity.value = withDelay(800, withTiming(1, { 
       duration: 800,
-      easing: ReanimatedEasing.inOut(ReanimatedEasing.sine)
+      easing: Easing.inOut(Easing.sine)
     }));
     
     // Button fade in
@@ -78,8 +78,8 @@ export default function SplashScreen() {
     // Mic bounce animation
     micBounce.value = withDelay(1000, withRepeat(
       withSequence(
-        withTiming(-8, { duration: 1500, easing: ReanimatedEasing.inOut(ReanimatedEasing.sine) }),
-        withTiming(0, { duration: 1500, easing: ReanimatedEasing.inOut(ReanimatedEasing.sine) })
+        withTiming(-8, { duration: 1500, easing: Easing.inOut(Easing.sine) }),
+        withTiming(0, { duration: 1500, easing: Easing.inOut(Easing.sine) })
       ),
       -1,
       true
@@ -87,21 +87,21 @@ export default function SplashScreen() {
 
     // Play icon rotation
     playIconRotation.value = withDelay(1200, withRepeat(
-      withTiming(360, { duration: 8000, easing: ReanimatedEasing.linear }),
+      withTiming(360, { duration: 8000, easing: Easing.linear }),
       -1,
       false
     ));
 
     // Wave animation
     waveAnimation.value = withRepeat(
-      withTiming(1, { duration: 3000, easing: ReanimatedEasing.inOut(ReanimatedEasing.sine) }),
+      withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.sine) }),
       -1,
       true
     );
 
     // Particle animation
     particleAnimation.value = withRepeat(
-      withTiming(1, { duration: 4000, easing: ReanimatedEasing.linear }),
+      withTiming(1, { duration: 4000, easing: Easing.linear }),
       -1,
       false
     );

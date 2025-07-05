@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import { useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { 
@@ -69,6 +69,16 @@ export default function PlayerScreen() {
     setIsFullscreen(!isFullscreen);
   };
 
+  const triggerHapticFeedback = () => {
+    // Web-compatible haptic feedback alternative
+    if (Platform.OS === 'web') {
+      // Visual feedback for web
+      scale.value = withSpring(0.95, { duration: 100 }, () => {
+        scale.value = withSpring(1, { duration: 100 });
+      });
+    }
+  };
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -111,7 +121,7 @@ export default function PlayerScreen() {
             {/* Video Controls */}
             {showControls && (
               <View style={styles.videoControls}>
-                <TouchableOpacity style={styles.videoControlButton}>
+                <TouchableOpacity style={styles.videoControlButton} onPress={triggerHapticFeedback}>
                   <SkipBack size={24} color="#FFFFFF" />
                 </TouchableOpacity>
                 
@@ -128,7 +138,7 @@ export default function PlayerScreen() {
                   </LinearGradient>
                 </TouchableOpacity>
                 
-                <TouchableOpacity style={styles.videoControlButton}>
+                <TouchableOpacity style={styles.videoControlButton} onPress={triggerHapticFeedback}>
                   <SkipForward size={24} color="#FFFFFF" />
                 </TouchableOpacity>
               </View>
@@ -164,7 +174,7 @@ export default function PlayerScreen() {
                   <Text style={styles.podcastName}>{currentEpisode.podcast}</Text>
                   <Text style={styles.hostName}>by {currentEpisode.host}</Text>
                 </View>
-                <TouchableOpacity style={styles.shareButton}>
+                <TouchableOpacity style={styles.shareButton} onPress={triggerHapticFeedback}>
                   <Share2 size={24} color="#FFFFFF" />
                 </TouchableOpacity>
               </View>
@@ -182,17 +192,17 @@ export default function PlayerScreen() {
                   </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.actionButton}>
+                <TouchableOpacity style={styles.actionButton} onPress={triggerHapticFeedback}>
                   <MessageCircle size={20} color="#9CA3AF" />
                   <Text style={styles.actionText}>Comment</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.actionButton}>
+                <TouchableOpacity style={styles.actionButton} onPress={triggerHapticFeedback}>
                   <Share2 size={20} color="#9CA3AF" />
                   <Text style={styles.actionText}>Share</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.actionButton}>
+                <TouchableOpacity style={styles.actionButton} onPress={triggerHapticFeedback}>
                   <Settings size={20} color="#9CA3AF" />
                   <Text style={styles.actionText}>Quality</Text>
                 </TouchableOpacity>
@@ -203,18 +213,24 @@ export default function PlayerScreen() {
             <View style={styles.audioControls}>
               <TouchableOpacity
                 style={[styles.controlButton, isShuffle && styles.activeControl]}
-                onPress={() => setIsShuffle(!isShuffle)}
+                onPress={() => {
+                  setIsShuffle(!isShuffle);
+                  triggerHapticFeedback();
+                }}
               >
                 <Shuffle size={20} color={isShuffle ? '#6366F1' : '#9CA3AF'} />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.controlButton}>
+              <TouchableOpacity style={styles.controlButton} onPress={triggerHapticFeedback}>
                 <Volume2 size={20} color="#9CA3AF" />
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={[styles.controlButton, isRepeat && styles.activeControl]}
-                onPress={() => setIsRepeat(!isRepeat)}
+                onPress={() => {
+                  setIsRepeat(!isRepeat);
+                  triggerHapticFeedback();
+                }}
               >
                 <Repeat size={20} color={isRepeat ? '#6366F1' : '#9CA3AF'} />
               </TouchableOpacity>
