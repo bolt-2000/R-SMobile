@@ -11,9 +11,9 @@ import Animated, {
   withTiming,
   withRepeat,
   interpolate,
-  runOnJS
+  runOnJS,
+  Easing as ReanimatedEasing
 } from 'react-native-reanimated';
-import * as ReanimatedEasing from 'react-native-reanimated/lib/reanimated2/Easing';
 import { Mic, Play, Volume2, Radio, Waves } from 'lucide-react-native';
 
 const { width, height } = Dimensions.get('window');
