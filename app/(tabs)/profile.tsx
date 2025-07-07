@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, 
 import { useEffect } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { Settings, Edit3, Mic, Headphones, Calendar, Award, Share2, Bell, TrendingUp, Users, LogOut, Crown, Shield, HelpCircle } from 'lucide-react-native';
+import { Settings, CreditCard as Edit3, Mic, Headphones, Calendar, Award, Share2, Bell, TrendingUp, Users, LogOut, Crown, Shield, CircleHelp as HelpCircle } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 import Animated, { 
