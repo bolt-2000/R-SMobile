@@ -1,8 +1,10 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, Alert } from 'react-native';
 import { useEffect } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Settings, CreditCard as Edit3, Mic, Headphones, Calendar, Award, Share2, Bell, TrendingUp, Users } from 'lucide-react-native';
+import { router } from 'expo-router';
+import { Settings, Edit3, Mic, Headphones, Calendar, Award, Share2, Bell, TrendingUp, Users, LogOut, Crown, Shield, HelpCircle } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
+import { useAuth } from '@/contexts/AuthContext';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
@@ -52,10 +54,11 @@ const achievements = [
 ];
 
 const menuItems = [
-  { title: 'Create New Episode', icon: Mic, color: Colors.primary[500] },
-  { title: 'Analytics Dashboard', icon: TrendingUp, color: Colors.accent.emerald },
-  { title: 'Notifications', icon: Bell, color: Colors.accent.amber },
-  { title: 'Settings', icon: Settings, color: Colors.neutral[500] },
+  { title: 'Create New Episode', icon: Mic, color: Colors.primary[500], route: null },
+  { title: 'Analytics Dashboard', icon: TrendingUp, color: Colors.accent.emerald, route: null },
+  { title: 'Subscription', icon: Crown, color: Colors.accent.amber, route: '/subscription' },
+  { title: 'Settings', icon: Settings, color: Colors.neutral[500], route: '/settings' },
+  { title: 'Help & Support', icon: HelpCircle, color: Colors.accent.pink, route: '/help' },
 ];
 
 // Animated Brand Component for Profile
@@ -190,9 +193,10 @@ function AnimatedProfileTitle() {
 }
 
 export default function ProfileScreen() {
+  const { user, signOut } = useAuth();
+
   const handleEditProfile = () => {
-    console.log('Edit profile pressed');
-    // Navigate to edit profile
+    router.push('/edit-profile');
   };
 
   const handleShareProfile = () => {
@@ -201,13 +205,38 @@ export default function ProfileScreen() {
   };
 
   const handleMenuItemPress = (item: any) => {
-    console.log('Menu item pressed:', item.title);
-    // Navigate to respective screen
+    if (item.route) {
+      router.push(item.route);
+    } else {
+      console.log('Menu item pressed:', item.title);
+    }
   };
 
   const handleAchievementPress = (achievement: any) => {
     console.log('Achievement pressed:', achievement.title);
     // Show achievement details
+  };
+
+  const handleSignOut = () => {
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm('Are you sure you want to sign out?');
+      if (confirmed) {
+        signOut();
+        router.replace('/');
+      }
+    } else {
+      Alert.alert(
+        'Sign Out',
+        'Are you sure you want to sign out?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Sign Out', style: 'destructive', onPress: () => {
+            signOut();
+            router.replace('/');
+          }},
+        ]
+      );
+    }
   };
 
   const triggerHapticFeedback = () => {
@@ -216,17 +245,37 @@ export default function ProfileScreen() {
     }
   };
 
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Please sign in to view your profile</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <LinearGradient
         colors={Colors.gradients.dark}
         style={styles.header}
       >
-        <AnimatedProfileTitle />
+        <View style={styles.headerTop}>
+          <AnimatedProfileTitle />
+          <TouchableOpacity 
+            style={[styles.signOutButton, { backgroundColor: Colors.accent.red + '20', borderColor: Colors.accent.red }]}
+            onPress={() => {
+              handleSignOut();
+              triggerHapticFeedback();
+            }}
+          >
+            <LogOut size={20} color={Colors.accent.red} />
+          </TouchableOpacity>
+        </View>
+        
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             <Image
-              source={{ uri: 'https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=200&h=200' }}
+              source={{ uri: user.avatar || 'https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=200&h=200' }}
               style={styles.avatar}
             />
             <TouchableOpacity 
@@ -238,13 +287,20 @@ export default function ProfileScreen() {
             >
               <Edit3 size={16} color="#FFFFFF" />
             </TouchableOpacity>
+            {user.subscription === 'premium' && (
+              <View style={[styles.premiumBadge, { backgroundColor: Colors.accent.amber }]}>
+                <Crown size={12} color="#FFFFFF" />
+              </View>
+            )}
           </View>
-          <Text style={styles.userName}>Alex Johnson</Text>
-          <Text style={[styles.userHandle, { color: Colors.primary[400] }]}>@alexjohnson</Text>
-          <Text style={styles.userBio}>
-            Passionate podcaster sharing insights on entrepreneurship, technology, and personal growth. 
-            Host of "Rise & Speak Weekly" 🎙️
-          </Text>
+          <Text style={styles.userName}>{user.name}</Text>
+          <Text style={[styles.userEmail, { color: Colors.primary[400] }]}>{user.email}</Text>
+          {user.isVerified && (
+            <View style={[styles.verifiedBadge, { backgroundColor: Colors.accent.emerald + '20', borderColor: Colors.accent.emerald }]}>
+              <Shield size={14} color={Colors.accent.emerald} />
+              <Text style={[styles.verifiedText, { color: Colors.accent.emerald }]}>Verified</Text>
+            </View>
+          )}
           <View style={styles.profileActions}>
             <TouchableOpacity 
               style={[styles.actionButton, { borderColor: Colors.primary[500] }]}
@@ -438,16 +494,36 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.dark.background,
   },
+  errorText: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 16,
+    color: Colors.neutral[400],
+    textAlign: 'center',
+    marginTop: 100,
+  },
   header: {
     paddingTop: 60,
     paddingBottom: 30,
     paddingHorizontal: 20,
   },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  signOutButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+  },
   // Animated Profile Brand Styles
   animatedProfileBrand: {
     position: 'relative',
     alignItems: 'center',
-    marginBottom: 20,
   },
   profileBrandGlow: {
     position: 'absolute',
@@ -563,24 +639,42 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.dark.card,
   },
+  premiumBadge: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.dark.card,
+  },
   userName: {
     fontFamily: 'Inter-Bold',
     fontSize: 24,
     color: '#FFFFFF',
     marginBottom: 4,
   },
-  userHandle: {
+  userEmail: {
     fontFamily: 'Inter-Regular',
     fontSize: 16,
     marginBottom: 12,
   },
-  userBio: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 14,
-    color: Colors.neutral[300],
-    textAlign: 'center',
-    lineHeight: 20,
+  verifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
     marginBottom: 20,
+  },
+  verifiedText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 12,
   },
   profileActions: {
     flexDirection: 'row',

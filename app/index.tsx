@@ -11,15 +11,16 @@ import Animated, {
   withTiming,
   withRepeat,
   interpolate,
-  runOnJS
 } from 'react-native-reanimated';
 import { Mic, Play, Volume2, Radio, Waves } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
+import { useAuth } from '@/contexts/AuthContext';
 
 const { width, height } = Dimensions.get('window');
 
 export default function SplashScreen() {
   const [showContent, setShowContent] = useState(false);
+  const { user, isLoading } = useAuth();
   
   // Animation values
   const logoScale = useSharedValue(0);
@@ -44,7 +45,6 @@ export default function SplashScreen() {
   const speakRotation = useSharedValue(180);
   const ampersandScale = useSharedValue(0);
   const ampersandRotation = useSharedValue(0);
-  const letterSpacing = useSharedValue(20);
   const brandGlow = useSharedValue(0);
   const brandPulse = useSharedValue(1);
   const shimmerPosition = useSharedValue(-1);
@@ -56,6 +56,17 @@ export default function SplashScreen() {
   };
 
   useEffect(() => {
+    // Check if user is already authenticated
+    if (!isLoading) {
+      if (user) {
+        // User is signed in, redirect to main app
+        setTimeout(() => {
+          router.replace('/(tabs)');
+        }, 2000);
+        return;
+      }
+    }
+
     // Initial logo entrance with spring physics
     logoScale.value = withSpring(1, { 
       damping: 8, 
@@ -89,9 +100,6 @@ export default function SplashScreen() {
     speakOpacity.value = withDelay(1200, withTiming(1, { duration: 800 }));
     speakScale.value = withDelay(1200, withSpring(1, { damping: 12, stiffness: 150 }));
     speakRotation.value = withDelay(1200, withSpring(0, { damping: 15, stiffness: 100 }));
-    
-    // Letter spacing animation
-    letterSpacing.value = withDelay(800, withSpring(4, { damping: 15, stiffness: 100 }));
     
     // Brand glow effect
     brandGlow.value = withDelay(1400, withRepeat(
@@ -189,7 +197,7 @@ export default function SplashScreen() {
     setTimeout(() => setShowContent(true), 2400);
     
     return () => clearInterval(pulseInterval);
-  }, []);
+  }, [user, isLoading]);
 
   const logoAnimatedStyle = useAnimatedStyle(() => ({
     transform: [
@@ -375,6 +383,22 @@ export default function SplashScreen() {
     }, 200);
   };
 
+  // Show loading state while checking auth
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <LinearGradient
+          colors={Colors.gradients.dark}
+          style={styles.gradient}
+        >
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Loading...</Text>
+          </View>
+        </LinearGradient>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -507,7 +531,7 @@ export default function SplashScreen() {
           </Animated.View>
 
           {/* Call to Action */}
-          {showContent && (
+          {showContent && !user && (
             <Animated.View style={[styles.ctaContainer, buttonAnimatedStyle]}>
               <Text style={styles.ctaText}>Tap the logo to begin your journey</Text>
               <View style={styles.tapIndicator}>
@@ -534,6 +558,16 @@ const styles = StyleSheet.create({
   gradient: {
     flex: 1,
     position: 'relative',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 16,
+    color: Colors.neutral[300],
   },
   particleContainer: {
     position: 'absolute',
