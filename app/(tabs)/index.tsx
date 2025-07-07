@@ -2,6 +2,16 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions
 import { LinearGradient } from 'expo-linear-gradient';
 import { TrendingUp, Clock, Star, Play, Video, Users, Calendar, Heart, Share2, Bookmark } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withSpring, 
+  withRepeat,
+  withSequence,
+  withTiming,
+  interpolate
+} from 'react-native-reanimated';
+import { useEffect } from 'react';
 
 const { width } = Dimensions.get('window');
 
@@ -103,6 +113,135 @@ const recentEpisodes = [
   },
 ];
 
+// Animated Brand Component
+function AnimatedBrandTitle() {
+  const riseScale = useSharedValue(1);
+  const speakScale = useSharedValue(1);
+  const ampersandRotation = useSharedValue(0);
+  const shimmerPosition = useSharedValue(-1);
+  const brandGlow = useSharedValue(0.5);
+
+  useEffect(() => {
+    // Continuous subtle animations
+    riseScale.value = withRepeat(
+      withSequence(
+        withTiming(1.02, { duration: 2000 }),
+        withTiming(1, { duration: 2000 })
+      ),
+      -1,
+      true
+    );
+
+    speakScale.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 2000 }),
+        withTiming(1.02, { duration: 2000 })
+      ),
+      -1,
+      true
+    );
+
+    ampersandRotation.value = withRepeat(
+      withTiming(360, { duration: 8000 }),
+      -1,
+      false
+    );
+
+    shimmerPosition.value = withRepeat(
+      withTiming(1, { duration: 4000 }),
+      -1,
+      false
+    );
+
+    brandGlow.value = withRepeat(
+      withSequence(
+        withTiming(0.8, { duration: 3000 }),
+        withTiming(0.3, { duration: 3000 })
+      ),
+      -1,
+      true
+    );
+  }, []);
+
+  const riseAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: riseScale.value }]
+  }));
+
+  const speakAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: speakScale.value }]
+  }));
+
+  const ampersandAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${ampersandRotation.value}deg` }]
+  }));
+
+  const shimmerAnimatedStyle = useAnimatedStyle(() => {
+    const translateX = interpolate(
+      shimmerPosition.value,
+      [-1, 1],
+      [-200, 200]
+    );
+    return {
+      transform: [{ translateX }],
+      opacity: interpolate(
+        shimmerPosition.value,
+        [-1, -0.5, 0, 0.5, 1],
+        [0, 0.3, 0.8, 0.3, 0]
+      )
+    };
+  });
+
+  const brandGlowAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: brandGlow.value * 0.6,
+  }));
+
+  return (
+    <View style={styles.animatedBrandContainer}>
+      {/* Glow Background */}
+      <Animated.View style={[styles.brandGlowBackground, brandGlowAnimatedStyle]} />
+      
+      {/* Shimmer Effect */}
+      <Animated.View style={[styles.shimmerOverlay, shimmerAnimatedStyle]} />
+      
+      <View style={styles.brandTextRow}>
+        {/* RISE */}
+        <Animated.View style={[styles.brandWordContainer, riseAnimatedStyle]}>
+          <LinearGradient
+            colors={[Colors.primary[400], Colors.secondary[400], Colors.accent.pink]}
+            style={styles.brandWordGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={[styles.brandWordText, styles.riseTextStyle]}>RISE</Text>
+          </LinearGradient>
+        </Animated.View>
+        
+        {/* Ampersand */}
+        <Animated.View style={[styles.ampersandContainer, ampersandAnimatedStyle]}>
+          <LinearGradient
+            colors={Colors.gradients.accent}
+            style={styles.ampersandGradient}
+          >
+            <Text style={styles.ampersandText}>&</Text>
+          </LinearGradient>
+        </Animated.View>
+        
+        {/* SPEAK */}
+        <Animated.View style={[styles.brandWordContainer, speakAnimatedStyle]}>
+          <LinearGradient
+            colors={[Colors.accent.orange, Colors.accent.pink, Colors.secondary[500]]}
+            style={styles.brandWordGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={[styles.brandWordText, styles.speakTextStyle]}>SPEAK</Text>
+          </LinearGradient>
+        </Animated.View>
+      </View>
+    </View>
+  );
+}
+
 export default function HomeScreen() {
   const handlePodcastPress = (podcast: any) => {
     console.log('Playing podcast:', podcast.title);
@@ -154,14 +293,7 @@ export default function HomeScreen() {
       >
         <View style={styles.headerContent}>
           <Text style={styles.greeting}>Good Morning!</Text>
-          <View style={styles.brandContainer}>
-            <LinearGradient
-              colors={Colors.gradients.primary}
-              style={styles.brandGradient}
-            >
-              <Text style={styles.title}>RISE & SPEAK</Text>
-            </LinearGradient>
-          </View>
+          <AnimatedBrandTitle />
           <Text style={styles.subtitle}>Ready to Rise & Speak?</Text>
           <View style={styles.headerStats}>
             <View style={styles.statItem}>
@@ -410,20 +542,92 @@ const styles = StyleSheet.create({
     color: Colors.neutral[400],
     marginBottom: 8,
   },
-  brandContainer: {
-    marginBottom: 8,
+  // Animated Brand Styles
+  animatedBrandContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    marginVertical: 8,
   },
-  brandGradient: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
+  brandGlowBackground: {
+    position: 'absolute',
+    width: 280,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'rgba(99, 102, 241, 0.3)',
+    top: -5,
+    zIndex: -1,
+  },
+  shimmerOverlay: {
+    position: 'absolute',
+    width: 100,
+    height: 50,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    top: 0,
+    zIndex: 1,
+    borderRadius: 25,
+  },
+  brandTextRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  brandWordContainer: {
+    marginHorizontal: 2,
+  },
+  brandWordGradient: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 6,
   },
-  title: {
+  brandWordText: {
     fontFamily: 'Inter-Bold',
-    fontSize: 28,
+    fontSize: 24,
     color: '#FFFFFF',
-    textAlign: 'center',
     letterSpacing: 2,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  riseTextStyle: {
+    transform: [{ skewX: '-3deg' }],
+  },
+  speakTextStyle: {
+    transform: [{ skewX: '3deg' }],
+  },
+  ampersandContainer: {
+    marginHorizontal: 6,
+    marginTop: -2,
+  },
+  ampersandGradient: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: Colors.accent.orange,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  ampersandText: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 18,
+    color: '#FFFFFF',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   subtitle: {
     fontFamily: 'Inter-Regular',

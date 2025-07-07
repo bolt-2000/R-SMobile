@@ -1,7 +1,17 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform } from 'react-native';
+import { useEffect } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Settings, CreditCard as Edit3, Mic, Headphones, Calendar, Award, Share2, Bell, TrendingUp, Users } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withSpring, 
+  withRepeat,
+  withSequence,
+  withTiming,
+  interpolate
+} from 'react-native-reanimated';
 
 const userStats = [
   { label: 'Episodes Listened', value: '247', icon: Headphones, color: Colors.primary[500] },
@@ -48,6 +58,137 @@ const menuItems = [
   { title: 'Settings', icon: Settings, color: Colors.neutral[500] },
 ];
 
+// Animated Brand Component for Profile
+function AnimatedProfileTitle() {
+  const riseScale = useSharedValue(1);
+  const speakScale = useSharedValue(1);
+  const ampersandRotation = useSharedValue(0);
+  const shimmerPosition = useSharedValue(-1);
+  const brandGlow = useSharedValue(0.3);
+
+  useEffect(() => {
+    // Continuous subtle animations
+    riseScale.value = withRepeat(
+      withSequence(
+        withTiming(1.008, { duration: 3500 }),
+        withTiming(1, { duration: 3500 })
+      ),
+      -1,
+      true
+    );
+
+    speakScale.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 3500 }),
+        withTiming(1.008, { duration: 3500 })
+      ),
+      -1,
+      true
+    );
+
+    ampersandRotation.value = withRepeat(
+      withTiming(360, { duration: 15000 }),
+      -1,
+      false
+    );
+
+    shimmerPosition.value = withRepeat(
+      withTiming(1, { duration: 7000 }),
+      -1,
+      false
+    );
+
+    brandGlow.value = withRepeat(
+      withSequence(
+        withTiming(0.5, { duration: 4500 }),
+        withTiming(0.1, { duration: 4500 })
+      ),
+      -1,
+      true
+    );
+  }, []);
+
+  const riseAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: riseScale.value }]
+  }));
+
+  const speakAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: speakScale.value }]
+  }));
+
+  const ampersandAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${ampersandRotation.value}deg` }]
+  }));
+
+  const shimmerAnimatedStyle = useAnimatedStyle(() => {
+    const translateX = interpolate(
+      shimmerPosition.value,
+      [-1, 1],
+      [-120, 120]
+    );
+    return {
+      transform: [{ translateX }],
+      opacity: interpolate(
+        shimmerPosition.value,
+        [-1, -0.5, 0, 0.5, 1],
+        [0, 0.1, 0.4, 0.1, 0]
+      )
+    };
+  });
+
+  const brandGlowAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: brandGlow.value * 0.3,
+  }));
+
+  return (
+    <View style={styles.animatedProfileBrand}>
+      {/* Glow Background */}
+      <Animated.View style={[styles.profileBrandGlow, brandGlowAnimatedStyle]} />
+      
+      {/* Shimmer Effect */}
+      <Animated.View style={[styles.profileShimmer, shimmerAnimatedStyle]} />
+      
+      <View style={styles.profileBrandRow}>
+        {/* RISE */}
+        <Animated.View style={[styles.profileWordContainer, riseAnimatedStyle]}>
+          <LinearGradient
+            colors={[Colors.primary[400], Colors.secondary[400]]}
+            style={styles.profileWordGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={[styles.profileWordText, styles.profileRiseText]}>RISE</Text>
+          </LinearGradient>
+        </Animated.View>
+        
+        {/* Ampersand */}
+        <Animated.View style={[styles.profileAmpersand, ampersandAnimatedStyle]}>
+          <LinearGradient
+            colors={Colors.gradients.accent}
+            style={styles.profileAmpersandGradient}
+          >
+            <Text style={styles.profileAmpersandText}>&</Text>
+          </LinearGradient>
+        </Animated.View>
+        
+        {/* SPEAK */}
+        <Animated.View style={[styles.profileWordContainer, speakAnimatedStyle]}>
+          <LinearGradient
+            colors={[Colors.accent.orange, Colors.secondary[500]]}
+            style={styles.profileWordGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={[styles.profileWordText, styles.profileSpeakText]}>SPEAK</Text>
+          </LinearGradient>
+        </Animated.View>
+      </View>
+      
+      <Text style={styles.profileSubtitle}>Profile</Text>
+    </View>
+  );
+}
+
 export default function ProfileScreen() {
   const handleEditProfile = () => {
     console.log('Edit profile pressed');
@@ -81,6 +222,7 @@ export default function ProfileScreen() {
         colors={Colors.gradients.dark}
         style={styles.header}
       >
+        <AnimatedProfileTitle />
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             <Image
@@ -300,6 +442,100 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 30,
     paddingHorizontal: 20,
+  },
+  // Animated Profile Brand Styles
+  animatedProfileBrand: {
+    position: 'relative',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  profileBrandGlow: {
+    position: 'absolute',
+    width: 180,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    top: -2,
+    zIndex: -1,
+  },
+  profileShimmer: {
+    position: 'absolute',
+    width: 60,
+    height: 30,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    top: 0,
+    zIndex: 1,
+    borderRadius: 15,
+  },
+  profileBrandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  profileWordContainer: {
+    marginHorizontal: 1,
+  },
+  profileWordGradient: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  profileWordText: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 16,
+    color: '#FFFFFF',
+    letterSpacing: 0.8,
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  profileRiseText: {
+    transform: [{ skewX: '-1deg' }],
+  },
+  profileSpeakText: {
+    transform: [{ skewX: '1deg' }],
+  },
+  profileAmpersand: {
+    marginHorizontal: 2,
+    marginTop: -1,
+  },
+  profileAmpersandGradient: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: Colors.accent.orange,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  profileAmpersandText: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 10,
+    color: '#FFFFFF',
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  profileSubtitle: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 10,
+    color: Colors.neutral[400],
+    marginTop: 1,
+    letterSpacing: 0.2,
   },
   profileSection: {
     alignItems: 'center',

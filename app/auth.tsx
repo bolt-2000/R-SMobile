@@ -1,12 +1,16 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Dimensions, Platform } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
   withSpring,
-  withDelay
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
+  interpolate
 } from 'react-native-reanimated';
 import { 
   ArrowLeft, 
@@ -24,6 +28,135 @@ import { Colors } from '@/constants/Colors';
 
 const { width } = Dimensions.get('window');
 
+// Animated Brand Component for Auth
+function AnimatedAuthTitle() {
+  const riseScale = useSharedValue(1);
+  const speakScale = useSharedValue(1);
+  const ampersandRotation = useSharedValue(0);
+  const shimmerPosition = useSharedValue(-1);
+  const brandGlow = useSharedValue(0.2);
+
+  useEffect(() => {
+    // Continuous subtle animations
+    riseScale.value = withRepeat(
+      withSequence(
+        withTiming(1.005, { duration: 4000 }),
+        withTiming(1, { duration: 4000 })
+      ),
+      -1,
+      true
+    );
+
+    speakScale.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 4000 }),
+        withTiming(1.005, { duration: 4000 })
+      ),
+      -1,
+      true
+    );
+
+    ampersandRotation.value = withRepeat(
+      withTiming(360, { duration: 20000 }),
+      -1,
+      false
+    );
+
+    shimmerPosition.value = withRepeat(
+      withTiming(1, { duration: 8000 }),
+      -1,
+      false
+    );
+
+    brandGlow.value = withRepeat(
+      withSequence(
+        withTiming(0.4, { duration: 5000 }),
+        withTiming(0.1, { duration: 5000 })
+      ),
+      -1,
+      true
+    );
+  }, []);
+
+  const riseAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: riseScale.value }]
+  }));
+
+  const speakAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: speakScale.value }]
+  }));
+
+  const ampersandAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${ampersandRotation.value}deg` }]
+  }));
+
+  const shimmerAnimatedStyle = useAnimatedStyle(() => {
+    const translateX = interpolate(
+      shimmerPosition.value,
+      [-1, 1],
+      [-100, 100]
+    );
+    return {
+      transform: [{ translateX }],
+      opacity: interpolate(
+        shimmerPosition.value,
+        [-1, -0.5, 0, 0.5, 1],
+        [0, 0.08, 0.3, 0.08, 0]
+      )
+    };
+  });
+
+  const brandGlowAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: brandGlow.value * 0.2,
+  }));
+
+  return (
+    <View style={styles.animatedAuthBrand}>
+      {/* Glow Background */}
+      <Animated.View style={[styles.authBrandGlow, brandGlowAnimatedStyle]} />
+      
+      {/* Shimmer Effect */}
+      <Animated.View style={[styles.authShimmer, shimmerAnimatedStyle]} />
+      
+      <View style={styles.authBrandRow}>
+        {/* RISE */}
+        <Animated.View style={[styles.authWordContainer, riseAnimatedStyle]}>
+          <LinearGradient
+            colors={[Colors.primary[400], Colors.secondary[400]]}
+            style={styles.authWordGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={[styles.authWordText, styles.authRiseText]}>RISE</Text>
+          </LinearGradient>
+        </Animated.View>
+        
+        {/* Ampersand */}
+        <Animated.View style={[styles.authAmpersand, ampersandAnimatedStyle]}>
+          <LinearGradient
+            colors={Colors.gradients.accent}
+            style={styles.authAmpersandGradient}
+          >
+            <Text style={styles.authAmpersandText}>&</Text>
+          </LinearGradient>
+        </Animated.View>
+        
+        {/* SPEAK */}
+        <Animated.View style={[styles.authWordContainer, speakAnimatedStyle]}>
+          <LinearGradient
+            colors={[Colors.accent.orange, Colors.secondary[500]]}
+            style={styles.authWordGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={[styles.authWordText, styles.authSpeakText]}>SPEAK</Text>
+          </LinearGradient>
+        </Animated.View>
+      </View>
+    </View>
+  );
+}
+
 export default function AuthScreen() {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -35,10 +168,10 @@ export default function AuthScreen() {
   const formOpacity = useSharedValue(0);
   const socialOpacity = useSharedValue(0);
 
-  useState(() => {
+  useEffect(() => {
     formOpacity.value = withDelay(200, withSpring(1, { duration: 600 }));
     socialOpacity.value = withDelay(400, withSpring(1, { duration: 600 }));
-  });
+  }, []);
 
   const formAnimatedStyle = useAnimatedStyle(() => ({
     opacity: formOpacity.value,
@@ -102,14 +235,7 @@ export default function AuthScreen() {
               >
                 <Text style={styles.logoText}>R&S</Text>
               </LinearGradient>
-              <LinearGradient
-                colors={Colors.gradients.primary}
-                style={styles.welcomeGradient}
-              >
-                <Text style={styles.welcomeText}>
-                  {isLogin ? 'Welcome Back!' : 'Join RISE & SPEAK'}
-                </Text>
-              </LinearGradient>
+              <AnimatedAuthTitle />
               <Text style={styles.subtitleText}>
                 {isLogin 
                   ? 'Sign in to continue your podcast journey' 
@@ -336,23 +462,99 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#FFFFFF',
   },
-  welcomeGradient: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 16,
-    marginBottom: 8,
+  // Animated Auth Brand Styles
+  animatedAuthBrand: {
+    position: 'relative',
+    alignItems: 'center',
+    marginVertical: 8,
   },
-  welcomeText: {
+  authBrandGlow: {
+    position: 'absolute',
+    width: 160,
+    height: 35,
+    borderRadius: 18,
+    backgroundColor: 'rgba(99, 102, 241, 0.08)',
+    top: -2,
+    zIndex: -1,
+  },
+  authShimmer: {
+    position: 'absolute',
+    width: 50,
+    height: 25,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    top: 0,
+    zIndex: 1,
+    borderRadius: 12,
+  },
+  authBrandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  authWordContainer: {
+    marginHorizontal: 1,
+  },
+  authWordGradient: {
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 6,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+    elevation: 1,
+  },
+  authWordText: {
     fontFamily: 'Inter-Bold',
-    fontSize: 28,
+    fontSize: 14,
     color: '#FFFFFF',
-    textAlign: 'center',
+    letterSpacing: 0.6,
+    textShadowColor: 'rgba(0, 0, 0, 0.15)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 1,
+  },
+  authRiseText: {
+    transform: [{ skewX: '-0.5deg' }],
+  },
+  authSpeakText: {
+    transform: [{ skewX: '0.5deg' }],
+  },
+  authAmpersand: {
+    marginHorizontal: 2,
+    marginTop: -1,
+  },
+  authAmpersandGradient: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: Colors.accent.orange,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 1,
+    elevation: 1,
+  },
+  authAmpersandText: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 8,
+    color: '#FFFFFF',
+    textShadowColor: 'rgba(0, 0, 0, 0.15)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 1,
   },
   subtitleText: {
     fontFamily: 'Inter-Regular',
     fontSize: 16,
     color: Colors.neutral[400],
     textAlign: 'center',
+    marginTop: 8,
   },
   formContainer: {
     paddingHorizontal: 20,

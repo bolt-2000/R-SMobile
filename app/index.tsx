@@ -34,6 +34,20 @@ export default function SplashScreen() {
   const waveAnimation = useSharedValue(0);
   const particleAnimation = useSharedValue(0);
   const borderAnimation = useSharedValue(0);
+  
+  // Brand name animations
+  const riseScale = useSharedValue(0);
+  const speakScale = useSharedValue(0);
+  const riseOpacity = useSharedValue(0);
+  const speakOpacity = useSharedValue(0);
+  const riseRotation = useSharedValue(-180);
+  const speakRotation = useSharedValue(180);
+  const ampersandScale = useSharedValue(0);
+  const ampersandRotation = useSharedValue(0);
+  const letterSpacing = useSharedValue(20);
+  const brandGlow = useSharedValue(0);
+  const brandPulse = useSharedValue(1);
+  const shimmerPosition = useSharedValue(-1);
 
   const triggerHapticFeedback = () => {
     if (Platform.OS === 'web') {
@@ -59,13 +73,50 @@ export default function SplashScreen() {
       withTiming(0, { duration: 400 })
     );
     
+    // Elegant brand name entrance sequence
+    riseOpacity.value = withDelay(600, withTiming(1, { duration: 800 }));
+    riseScale.value = withDelay(600, withSpring(1, { damping: 12, stiffness: 150 }));
+    riseRotation.value = withDelay(600, withSpring(0, { damping: 15, stiffness: 100 }));
+    
+    // Ampersand with special effect
+    ampersandScale.value = withDelay(1000, withSpring(1.2, { damping: 8, stiffness: 200 }));
+    ampersandRotation.value = withDelay(1000, withSequence(
+      withTiming(360, { duration: 800 }),
+      withSpring(0, { damping: 10 })
+    ));
+    
+    // SPEAK entrance
+    speakOpacity.value = withDelay(1200, withTiming(1, { duration: 800 }));
+    speakScale.value = withDelay(1200, withSpring(1, { damping: 12, stiffness: 150 }));
+    speakRotation.value = withDelay(1200, withSpring(0, { damping: 15, stiffness: 100 }));
+    
+    // Letter spacing animation
+    letterSpacing.value = withDelay(800, withSpring(4, { damping: 15, stiffness: 100 }));
+    
+    // Brand glow effect
+    brandGlow.value = withDelay(1400, withRepeat(
+      withSequence(
+        withTiming(1, { duration: 2000 }),
+        withTiming(0.3, { duration: 2000 })
+      ),
+      -1,
+      true
+    ));
+    
+    // Shimmer effect
+    shimmerPosition.value = withDelay(2000, withRepeat(
+      withTiming(1, { duration: 3000 }),
+      -1,
+      false
+    ));
+    
     // Text fade in with stagger
-    textOpacity.value = withDelay(800, withTiming(1, { 
+    textOpacity.value = withDelay(1600, withTiming(1, { 
       duration: 800
     }));
     
     // Button fade in
-    buttonOpacity.value = withDelay(1400, withTiming(1, { 
+    buttonOpacity.value = withDelay(2200, withTiming(1, { 
       duration: 600 
     }));
     
@@ -126,12 +177,16 @@ export default function SplashScreen() {
         withSpring(1.05, { duration: 1200 }),
         withSpring(1, { duration: 1200 })
       );
+      brandPulse.value = withSequence(
+        withSpring(1.02, { duration: 1200 }),
+        withSpring(1, { duration: 1200 })
+      );
     };
     
-    setTimeout(startPulse, 2000);
-    const pulseInterval = setInterval(startPulse, 4000);
+    setTimeout(startPulse, 3000);
+    const pulseInterval = setInterval(startPulse, 5000);
     
-    setTimeout(() => setShowContent(true), 1600);
+    setTimeout(() => setShowContent(true), 2400);
     
     return () => clearInterval(pulseInterval);
   }, []);
@@ -142,6 +197,62 @@ export default function SplashScreen() {
       { rotate: `${logoRotation.value}deg` }
     ],
     opacity: logoOpacity.value,
+  }));
+
+  const riseAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: riseOpacity.value,
+    transform: [
+      { scale: riseScale.value * brandPulse.value },
+      { rotate: `${riseRotation.value}deg` }
+    ]
+  }));
+
+  const speakAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: speakOpacity.value,
+    transform: [
+      { scale: speakScale.value * brandPulse.value },
+      { rotate: `${speakRotation.value}deg` }
+    ]
+  }));
+
+  const ampersandAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: ampersandScale.value },
+      { rotate: `${ampersandRotation.value}deg` }
+    ]
+  }));
+
+  const brandContainerAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: brandPulse.value }]
+  }));
+
+  const shimmerAnimatedStyle = useAnimatedStyle(() => {
+    const translateX = interpolate(
+      shimmerPosition.value,
+      [-1, 1],
+      [-width, width]
+    );
+    return {
+      transform: [{ translateX }],
+      opacity: interpolate(
+        shimmerPosition.value,
+        [-1, -0.5, 0, 0.5, 1],
+        [0, 0.5, 1, 0.5, 0]
+      )
+    };
+  });
+
+  const brandGlowAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: brandGlow.value * 0.8,
+    transform: [
+      { 
+        scale: interpolate(
+          brandGlow.value,
+          [0.3, 1],
+          [1, 1.1]
+        )
+      }
+    ]
   }));
 
   const textAnimatedStyle = useAnimatedStyle(() => ({
@@ -247,6 +358,16 @@ export default function SplashScreen() {
       withSpring(1, { duration: 300 })
     );
     
+    // Brand name press effect
+    riseScale.value = withSequence(
+      withTiming(0.98, { duration: 100 }),
+      withSpring(1, { duration: 300 })
+    );
+    speakScale.value = withSequence(
+      withTiming(0.98, { duration: 100 }),
+      withSpring(1, { duration: 300 })
+    );
+    
     triggerHapticFeedback();
     
     setTimeout(() => {
@@ -334,14 +455,50 @@ export default function SplashScreen() {
             </Animated.View>
           </TouchableOpacity>
 
-          {/* Brand Text */}
-          <Animated.View style={[styles.brandContainer, textAnimatedStyle]}>
-            <LinearGradient
-              colors={Colors.gradients.primary}
-              style={styles.brandTitleGradient}
-            >
-              <Text style={styles.brandTitle}>RISE & SPEAK</Text>
-            </LinearGradient>
+          {/* Enhanced Brand Text with Creative Animations */}
+          <Animated.View style={[styles.brandContainer, brandContainerAnimatedStyle]}>
+            {/* Brand Glow Background */}
+            <Animated.View style={[styles.brandGlowBackground, brandGlowAnimatedStyle]} />
+            
+            {/* Shimmer Effect */}
+            <Animated.View style={[styles.shimmerOverlay, shimmerAnimatedStyle]} />
+            
+            <View style={styles.brandTextContainer}>
+              {/* RISE with elegant entrance */}
+              <Animated.View style={[styles.wordContainer, riseAnimatedStyle]}>
+                <LinearGradient
+                  colors={[Colors.primary[400], Colors.secondary[400], Colors.accent.pink]}
+                  style={styles.wordGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Text style={[styles.brandWord, styles.riseText]}>RISE</Text>
+                </LinearGradient>
+              </Animated.View>
+              
+              {/* Animated Ampersand */}
+              <Animated.View style={[styles.ampersandContainer, ampersandAnimatedStyle]}>
+                <LinearGradient
+                  colors={Colors.gradients.accent}
+                  style={styles.ampersandGradient}
+                >
+                  <Text style={styles.ampersandText}>&</Text>
+                </LinearGradient>
+              </Animated.View>
+              
+              {/* SPEAK with elegant entrance */}
+              <Animated.View style={[styles.wordContainer, speakAnimatedStyle]}>
+                <LinearGradient
+                  colors={[Colors.accent.orange, Colors.accent.pink, Colors.secondary[500]]}
+                  style={styles.wordGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Text style={[styles.brandWord, styles.speakText]}>SPEAK</Text>
+                </LinearGradient>
+              </Animated.View>
+            </View>
+            
             <Text style={[styles.brandSubtitle, { color: Colors.secondary[400] }]}>Video Podcast Platform</Text>
             <View style={[styles.taglineContainer, { backgroundColor: Colors.dark.card, borderColor: Colors.secondary[600] }]}>
               <Volume2 size={16} color={Colors.secondary[400]} />
@@ -499,20 +656,88 @@ const styles = StyleSheet.create({
   brandContainer: {
     alignItems: 'center',
     marginBottom: 80,
+    position: 'relative',
   },
-  brandTitleGradient: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 16,
+  brandGlowBackground: {
+    position: 'absolute',
+    width: 400,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+    top: -20,
+    zIndex: -1,
+  },
+  shimmerOverlay: {
+    position: 'absolute',
+    width: 200,
+    height: 80,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    top: 0,
+    zIndex: 1,
+    borderRadius: 40,
+  },
+  brandTextContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 8,
+    position: 'relative',
+    zIndex: 2,
   },
-  brandTitle: {
+  wordContainer: {
+    marginHorizontal: 4,
+  },
+  wordGradient: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  brandWord: {
     fontFamily: 'Inter-Bold',
-    fontSize: 36,
+    fontSize: 32,
     color: '#FFFFFF',
-    textAlign: 'center',
     letterSpacing: 3,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  riseText: {
+    transform: [{ skewX: '-5deg' }],
+  },
+  speakText: {
+    transform: [{ skewX: '5deg' }],
+  },
+  ampersandContainer: {
+    marginHorizontal: 8,
+    marginTop: -4,
+  },
+  ampersandGradient: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: Colors.accent.orange,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.6,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  ampersandText: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 24,
+    color: '#FFFFFF',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
   },

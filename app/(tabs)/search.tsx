@@ -1,8 +1,17 @@
 import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, Image, Platform } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, TrendingUp, Play, Clock, Heart, Share2 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '@/constants/Colors';
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withSpring, 
+  withRepeat,
+  withSequence,
+  withTiming,
+  interpolate
+} from 'react-native-reanimated';
 
 const popularSearches = [
   'Business Growth',
@@ -54,6 +63,137 @@ const searchResults = [
   },
 ];
 
+// Animated Brand Component for Search
+function AnimatedSearchTitle() {
+  const riseScale = useSharedValue(1);
+  const speakScale = useSharedValue(1);
+  const ampersandRotation = useSharedValue(0);
+  const shimmerPosition = useSharedValue(-1);
+  const brandGlow = useSharedValue(0.4);
+
+  useEffect(() => {
+    // Continuous subtle animations
+    riseScale.value = withRepeat(
+      withSequence(
+        withTiming(1.015, { duration: 3000 }),
+        withTiming(1, { duration: 3000 })
+      ),
+      -1,
+      true
+    );
+
+    speakScale.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 3000 }),
+        withTiming(1.015, { duration: 3000 })
+      ),
+      -1,
+      true
+    );
+
+    ampersandRotation.value = withRepeat(
+      withTiming(360, { duration: 12000 }),
+      -1,
+      false
+    );
+
+    shimmerPosition.value = withRepeat(
+      withTiming(1, { duration: 6000 }),
+      -1,
+      false
+    );
+
+    brandGlow.value = withRepeat(
+      withSequence(
+        withTiming(0.6, { duration: 4000 }),
+        withTiming(0.2, { duration: 4000 })
+      ),
+      -1,
+      true
+    );
+  }, []);
+
+  const riseAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: riseScale.value }]
+  }));
+
+  const speakAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: speakScale.value }]
+  }));
+
+  const ampersandAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${ampersandRotation.value}deg` }]
+  }));
+
+  const shimmerAnimatedStyle = useAnimatedStyle(() => {
+    const translateX = interpolate(
+      shimmerPosition.value,
+      [-1, 1],
+      [-140, 140]
+    );
+    return {
+      transform: [{ translateX }],
+      opacity: interpolate(
+        shimmerPosition.value,
+        [-1, -0.5, 0, 0.5, 1],
+        [0, 0.15, 0.5, 0.15, 0]
+      )
+    };
+  });
+
+  const brandGlowAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: brandGlow.value * 0.4,
+  }));
+
+  return (
+    <View style={styles.animatedSearchBrand}>
+      {/* Glow Background */}
+      <Animated.View style={[styles.searchBrandGlow, brandGlowAnimatedStyle]} />
+      
+      {/* Shimmer Effect */}
+      <Animated.View style={[styles.searchShimmer, shimmerAnimatedStyle]} />
+      
+      <View style={styles.searchBrandRow}>
+        {/* RISE */}
+        <Animated.View style={[styles.searchWordContainer, riseAnimatedStyle]}>
+          <LinearGradient
+            colors={[Colors.primary[400], Colors.secondary[400]]}
+            style={styles.searchWordGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={[styles.searchWordText, styles.searchRiseText]}>RISE</Text>
+          </LinearGradient>
+        </Animated.View>
+        
+        {/* Ampersand */}
+        <Animated.View style={[styles.searchAmpersand, ampersandAnimatedStyle]}>
+          <LinearGradient
+            colors={Colors.gradients.accent}
+            style={styles.searchAmpersandGradient}
+          >
+            <Text style={styles.searchAmpersandText}>&</Text>
+          </LinearGradient>
+        </Animated.View>
+        
+        {/* SPEAK */}
+        <Animated.View style={[styles.searchWordContainer, speakAnimatedStyle]}>
+          <LinearGradient
+            colors={[Colors.accent.orange, Colors.secondary[500]]}
+            style={styles.searchWordGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={[styles.searchWordText, styles.searchSpeakText]}>SPEAK</Text>
+          </LinearGradient>
+        </Animated.View>
+      </View>
+      
+      <Text style={styles.searchSubtitle}>Search</Text>
+    </View>
+  );
+}
+
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
@@ -92,12 +232,7 @@ export default function SearchScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <LinearGradient
-          colors={Colors.gradients.primary}
-          style={styles.titleGradient}
-        >
-          <Text style={styles.title}>RISE & SPEAK Search</Text>
-        </LinearGradient>
+        <AnimatedSearchTitle />
         <View style={styles.searchContainer}>
           <View style={styles.searchBar}>
             <Search size={20} color={Colors.neutral[500]} />
@@ -296,18 +431,99 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.dark.border,
   },
-  titleGradient: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 16,
+  // Animated Search Brand Styles
+  animatedSearchBrand: {
+    position: 'relative',
+    alignItems: 'center',
     marginBottom: 20,
-    alignSelf: 'center',
   },
-  title: {
+  searchBrandGlow: {
+    position: 'absolute',
+    width: 200,
+    height: 45,
+    borderRadius: 22,
+    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    top: -3,
+    zIndex: -1,
+  },
+  searchShimmer: {
+    position: 'absolute',
+    width: 70,
+    height: 35,
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    top: 0,
+    zIndex: 1,
+    borderRadius: 18,
+  },
+  searchBrandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  searchWordContainer: {
+    marginHorizontal: 1,
+  },
+  searchWordGradient: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  searchWordText: {
     fontFamily: 'Inter-Bold',
-    fontSize: 24,
+    fontSize: 18,
     color: '#FFFFFF',
     letterSpacing: 1,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  searchRiseText: {
+    transform: [{ skewX: '-1.5deg' }],
+  },
+  searchSpeakText: {
+    transform: [{ skewX: '1.5deg' }],
+  },
+  searchAmpersand: {
+    marginHorizontal: 3,
+    marginTop: -1,
+  },
+  searchAmpersandGradient: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: Colors.accent.orange,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  searchAmpersandText: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 12,
+    color: '#FFFFFF',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  searchSubtitle: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 12,
+    color: Colors.neutral[400],
+    marginTop: 2,
+    letterSpacing: 0.3,
   },
   searchContainer: {
     flexDirection: 'row',

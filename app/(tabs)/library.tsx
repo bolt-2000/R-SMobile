@@ -1,8 +1,17 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform } from 'react-native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Heart, Download, Clock, Play, TrendingUp, BookOpen, Share2, MoveHorizontal as MoreHorizontal } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors } from '@/constants/Colors';
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withSpring, 
+  withRepeat,
+  withSequence,
+  withTiming,
+  interpolate
+} from 'react-native-reanimated';
 
 const tabs = [
   { id: 'favorites', title: 'Favorites', icon: Heart },
@@ -82,6 +91,137 @@ const listeningHistory = [
     listenedAt: '1 day ago',
   },
 ];
+
+// Animated Brand Component for Library
+function AnimatedLibraryTitle() {
+  const riseScale = useSharedValue(1);
+  const speakScale = useSharedValue(1);
+  const ampersandRotation = useSharedValue(0);
+  const shimmerPosition = useSharedValue(-1);
+  const brandGlow = useSharedValue(0.5);
+
+  useEffect(() => {
+    // Continuous subtle animations
+    riseScale.value = withRepeat(
+      withSequence(
+        withTiming(1.01, { duration: 2500 }),
+        withTiming(1, { duration: 2500 })
+      ),
+      -1,
+      true
+    );
+
+    speakScale.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 2500 }),
+        withTiming(1.01, { duration: 2500 })
+      ),
+      -1,
+      true
+    );
+
+    ampersandRotation.value = withRepeat(
+      withTiming(360, { duration: 10000 }),
+      -1,
+      false
+    );
+
+    shimmerPosition.value = withRepeat(
+      withTiming(1, { duration: 5000 }),
+      -1,
+      false
+    );
+
+    brandGlow.value = withRepeat(
+      withSequence(
+        withTiming(0.7, { duration: 3500 }),
+        withTiming(0.3, { duration: 3500 })
+      ),
+      -1,
+      true
+    );
+  }, []);
+
+  const riseAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: riseScale.value }]
+  }));
+
+  const speakAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: speakScale.value }]
+  }));
+
+  const ampersandAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${ampersandRotation.value}deg` }]
+  }));
+
+  const shimmerAnimatedStyle = useAnimatedStyle(() => {
+    const translateX = interpolate(
+      shimmerPosition.value,
+      [-1, 1],
+      [-150, 150]
+    );
+    return {
+      transform: [{ translateX }],
+      opacity: interpolate(
+        shimmerPosition.value,
+        [-1, -0.5, 0, 0.5, 1],
+        [0, 0.2, 0.6, 0.2, 0]
+      )
+    };
+  });
+
+  const brandGlowAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: brandGlow.value * 0.5,
+  }));
+
+  return (
+    <View style={styles.animatedLibraryBrand}>
+      {/* Glow Background */}
+      <Animated.View style={[styles.libraryBrandGlow, brandGlowAnimatedStyle]} />
+      
+      {/* Shimmer Effect */}
+      <Animated.View style={[styles.libraryShimmer, shimmerAnimatedStyle]} />
+      
+      <View style={styles.libraryBrandRow}>
+        {/* RISE */}
+        <Animated.View style={[styles.libraryWordContainer, riseAnimatedStyle]}>
+          <LinearGradient
+            colors={[Colors.primary[400], Colors.secondary[400]]}
+            style={styles.libraryWordGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={[styles.libraryWordText, styles.libraryRiseText]}>RISE</Text>
+          </LinearGradient>
+        </Animated.View>
+        
+        {/* Ampersand */}
+        <Animated.View style={[styles.libraryAmpersand, ampersandAnimatedStyle]}>
+          <LinearGradient
+            colors={Colors.gradients.accent}
+            style={styles.libraryAmpersandGradient}
+          >
+            <Text style={styles.libraryAmpersandText}>&</Text>
+          </LinearGradient>
+        </Animated.View>
+        
+        {/* SPEAK */}
+        <Animated.View style={[styles.libraryWordContainer, speakAnimatedStyle]}>
+          <LinearGradient
+            colors={[Colors.accent.orange, Colors.secondary[500]]}
+            style={styles.libraryWordGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Text style={[styles.libraryWordText, styles.librarySpeakText]}>SPEAK</Text>
+          </LinearGradient>
+        </Animated.View>
+      </View>
+      
+      <Text style={styles.librarySubtitle}>Library</Text>
+    </View>
+  );
+}
 
 export default function LibraryScreen() {
   const [activeTab, setActiveTab] = useState('favorites');
@@ -329,12 +469,7 @@ export default function LibraryScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <LinearGradient
-          colors={Colors.gradients.primary}
-          style={styles.titleGradient}
-        >
-          <Text style={styles.title}>RISE & SPEAK Library</Text>
-        </LinearGradient>
+        <AnimatedLibraryTitle />
       </View>
 
       <View style={[styles.tabContainer, { borderBottomColor: Colors.dark.border }]}>
@@ -383,17 +518,98 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.dark.border,
   },
-  titleGradient: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 16,
-    alignSelf: 'center',
+  // Animated Library Brand Styles
+  animatedLibraryBrand: {
+    position: 'relative',
+    alignItems: 'center',
   },
-  title: {
+  libraryBrandGlow: {
+    position: 'absolute',
+    width: 220,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+    top: -5,
+    zIndex: -1,
+  },
+  libraryShimmer: {
+    position: 'absolute',
+    width: 80,
+    height: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    top: 0,
+    zIndex: 1,
+    borderRadius: 20,
+  },
+  libraryBrandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  libraryWordContainer: {
+    marginHorizontal: 1,
+  },
+  libraryWordGradient: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  libraryWordText: {
     fontFamily: 'Inter-Bold',
-    fontSize: 24,
+    fontSize: 20,
     color: '#FFFFFF',
-    letterSpacing: 1,
+    letterSpacing: 1.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  libraryRiseText: {
+    transform: [{ skewX: '-2deg' }],
+  },
+  librarySpeakText: {
+    transform: [{ skewX: '2deg' }],
+  },
+  libraryAmpersand: {
+    marginHorizontal: 4,
+    marginTop: -1,
+  },
+  libraryAmpersandGradient: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: Colors.accent.orange,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  libraryAmpersandText: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 14,
+    color: '#FFFFFF',
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  librarySubtitle: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    color: Colors.neutral[400],
+    marginTop: 4,
+    letterSpacing: 0.5,
   },
   tabContainer: {
     paddingVertical: 16,
