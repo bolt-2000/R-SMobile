@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, 
 import { useEffect } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { Settings, CreditCard as Edit3, Mic, Headphones, Calendar, Award, Share2, Bell, TrendingUp, Users, LogOut, Crown, Shield, CircleHelp as HelpCircle } from 'lucide-react-native';
+import { Settings, Edit3, Mic, Headphones, Calendar, Award, Share2, Bell, TrendingUp, Users, LogOut, Crown, Shield, HelpCircle } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 import Animated, { 
@@ -14,44 +14,6 @@ import Animated, {
   withTiming,
   interpolate
 } from 'react-native-reanimated';
-
-const userStats = [
-  { label: 'Episodes Listened', value: '247', icon: Headphones, color: Colors.primary[500] },
-  { label: 'Hours Listened', value: '156', icon: Calendar, color: Colors.accent.emerald },
-  { label: 'Podcasts Created', value: '12', icon: Mic, color: Colors.accent.orange },
-  { label: 'Achievements', value: '8', icon: Award, color: Colors.accent.amber },
-];
-
-const achievements = [
-  {
-    id: 1,
-    title: 'First Episode',
-    description: 'Created your first podcast episode',
-    icon: '🎙️',
-    unlocked: true,
-  },
-  {
-    id: 2,
-    title: 'Rising Star',
-    description: 'Reached 1,000 episode listens',
-    icon: '⭐',
-    unlocked: true,
-  },
-  {
-    id: 3,
-    title: 'Content Creator',
-    description: 'Published 10 episodes',
-    icon: '🎬',
-    unlocked: true,
-  },
-  {
-    id: 4,
-    title: 'Podcast Master',
-    description: 'Reached 50 episodes published',
-    icon: '👑',
-    unlocked: false,
-  },
-];
 
 const menuItems = [
   { title: 'Create New Episode', icon: Mic, color: Colors.primary[500], route: null },
@@ -193,7 +155,7 @@ function AnimatedProfileTitle() {
 }
 
 export default function ProfileScreen() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAuthenticated } = useAuth();
 
   const handleEditProfile = () => {
     router.push('/edit-profile');
@@ -245,13 +207,77 @@ export default function ProfileScreen() {
     }
   };
 
-  if (!user) {
+  // Show sign in prompt if not authenticated
+  if (!isAuthenticated || !user) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>Please sign in to view your profile</Text>
+        <LinearGradient
+          colors={Colors.gradients.dark}
+          style={styles.signInPrompt}
+        >
+          <AnimatedProfileTitle />
+          <View style={styles.signInCard}>
+            <Text style={styles.signInTitle}>Sign In Required</Text>
+            <Text style={styles.signInText}>
+              Please sign in to view your profile and access all features
+            </Text>
+            <TouchableOpacity 
+              style={styles.signInButton}
+              onPress={() => {
+                router.push('/auth');
+                triggerHapticFeedback();
+              }}
+            >
+              <LinearGradient
+                colors={Colors.gradients.primary}
+                style={styles.signInButtonGradient}
+              >
+                <Text style={styles.signInButtonText}>Sign In</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </LinearGradient>
       </View>
     );
   }
+
+  const userStats = [
+    { label: 'Episodes Listened', value: user.stats?.episodesListened?.toString() || '0', icon: Headphones, color: Colors.primary[500] },
+    { label: 'Hours Listened', value: user.stats?.hoursListened?.toString() || '0', icon: Calendar, color: Colors.accent.emerald },
+    { label: 'Podcasts Created', value: user.stats?.podcastsCreated?.toString() || '0', icon: Mic, color: Colors.accent.orange },
+    { label: 'Followers', value: user.stats?.followers?.toString() || '0', icon: Users, color: Colors.accent.amber },
+  ];
+
+  const achievements = [
+    {
+      id: 1,
+      title: 'First Episode',
+      description: 'Created your first podcast episode',
+      icon: '🎙️',
+      unlocked: (user.stats?.podcastsCreated || 0) > 0,
+    },
+    {
+      id: 2,
+      title: 'Rising Star',
+      description: 'Reached 100 episode listens',
+      icon: '⭐',
+      unlocked: (user.stats?.episodesListened || 0) >= 100,
+    },
+    {
+      id: 3,
+      title: 'Content Creator',
+      description: 'Published 10 episodes',
+      icon: '🎬',
+      unlocked: (user.stats?.podcastsCreated || 0) >= 10,
+    },
+    {
+      id: 4,
+      title: 'Podcast Master',
+      description: 'Reached 50 episodes published',
+      icon: '👑',
+      unlocked: (user.stats?.podcastsCreated || 0) >= 50,
+    },
+  ];
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -439,49 +465,38 @@ export default function ProfileScreen() {
                 <Mic size={20} color={Colors.primary[400]} />
               </View>
               <View style={styles.activityContent}>
-                <Text style={styles.activityTitle}>Published new episode</Text>
+                <Text style={styles.activityTitle}>Account Created</Text>
                 <Text style={styles.activityDescription}>
-                  "Building Your Personal Brand in 2024" - Episode 47
+                  Welcome to RISE & SPEAK! Start exploring amazing podcasts.
                 </Text>
-                <Text style={styles.activityTime}>2 hours ago</Text>
+                <Text style={styles.activityTime}>
+                  {new Date(user.createdAt).toLocaleDateString()}
+                </Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.activityItem, { backgroundColor: Colors.dark.card, borderColor: Colors.dark.border }]}
-              onPress={() => {
-                console.log('Activity item pressed');
-                triggerHapticFeedback();
-              }}
-            >
-              <View style={[styles.activityIcon, { backgroundColor: Colors.accent.emerald + '20' }]}>
-                <Award size={20} color={Colors.accent.emerald} />
-              </View>
-              <View style={styles.activityContent}>
-                <Text style={styles.activityTitle}>Achievement unlocked</Text>
-                <Text style={styles.activityDescription}>
-                  Content Creator - Published 10 episodes
-                </Text>
-                <Text style={styles.activityTime}>1 day ago</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.activityItem, { backgroundColor: Colors.dark.card, borderColor: Colors.dark.border }]}
-              onPress={() => {
-                console.log('Activity item pressed');
-                triggerHapticFeedback();
-              }}
-            >
-              <View style={[styles.activityIcon, { backgroundColor: Colors.accent.amber + '20' }]}>
-                <Headphones size={20} color={Colors.accent.amber} />
-              </View>
-              <View style={styles.activityContent}>
-                <Text style={styles.activityTitle}>Listened to episode</Text>
-                <Text style={styles.activityDescription}>
-                  "The Power of Vulnerability in Leadership"
-                </Text>
-                <Text style={styles.activityTime}>2 days ago</Text>
-              </View>
-            </TouchableOpacity>
+            
+            {user.lastLogin && (
+              <TouchableOpacity 
+                style={[styles.activityItem, { backgroundColor: Colors.dark.card, borderColor: Colors.dark.border }]}
+                onPress={() => {
+                  console.log('Activity item pressed');
+                  triggerHapticFeedback();
+                }}
+              >
+                <View style={[styles.activityIcon, { backgroundColor: Colors.accent.emerald + '20' }]}>
+                  <Users size={20} color={Colors.accent.emerald} />
+                </View>
+                <View style={styles.activityContent}>
+                  <Text style={styles.activityTitle}>Last Login</Text>
+                  <Text style={styles.activityDescription}>
+                    You signed in to your account
+                  </Text>
+                  <Text style={styles.activityTime}>
+                    {new Date(user.lastLogin).toLocaleString()}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </View>
@@ -494,12 +509,49 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.dark.background,
   },
-  errorText: {
+  signInPrompt: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  signInCard: {
+    backgroundColor: Colors.dark.card,
+    borderRadius: 20,
+    padding: 30,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
+    marginTop: 40,
+  },
+  signInTitle: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 24,
+    color: '#FFFFFF',
+    marginBottom: 12,
+  },
+  signInText: {
     fontFamily: 'Inter-Regular',
     fontSize: 16,
     color: Colors.neutral[400],
     textAlign: 'center',
-    marginTop: 100,
+    lineHeight: 22,
+    marginBottom: 30,
+  },
+  signInButton: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    minWidth: 120,
+  },
+  signInButtonGradient: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  signInButtonText: {
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 16,
+    color: '#FFFFFF',
   },
   header: {
     paddingTop: 60,

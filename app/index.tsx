@@ -11,8 +11,9 @@ import Animated, {
   withTiming,
   withRepeat,
   interpolate,
+  Easing,
 } from 'react-native-reanimated';
-import { Mic, Play, Volume2, Radio, Waves } from 'lucide-react-native';
+import { Mic, Play, Volume2, Radio, Waves, Sparkles, Zap } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -20,9 +21,9 @@ const { width, height } = Dimensions.get('window');
 
 export default function SplashScreen() {
   const [showContent, setShowContent] = useState(false);
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth();
   
-  // Animation values
+  // Enhanced Animation values
   const logoScale = useSharedValue(0);
   const logoOpacity = useSharedValue(0);
   const logoRotation = useSharedValue(0);
@@ -36,7 +37,7 @@ export default function SplashScreen() {
   const particleAnimation = useSharedValue(0);
   const borderAnimation = useSharedValue(0);
   
-  // Brand name animations
+  // Enhanced Brand name animations
   const riseScale = useSharedValue(0);
   const speakScale = useSharedValue(0);
   const riseOpacity = useSharedValue(0);
@@ -48,6 +49,8 @@ export default function SplashScreen() {
   const brandGlow = useSharedValue(0);
   const brandPulse = useSharedValue(1);
   const shimmerPosition = useSharedValue(-1);
+  const letterSpacing = useSharedValue(0);
+  const brandElevation = useSharedValue(0);
 
   const triggerHapticFeedback = () => {
     if (Platform.OS === 'web') {
@@ -56,149 +59,171 @@ export default function SplashScreen() {
   };
 
   useEffect(() => {
-    // Check if user is already authenticated
+    // Check authentication and redirect accordingly
     if (!isLoading) {
-      if (user) {
-        // User is signed in, redirect to main app
+      if (isAuthenticated && user) {
+        // User is signed in, redirect to main app after animation
         setTimeout(() => {
           router.replace('/(tabs)');
-        }, 2000);
+        }, 3000);
         return;
       }
     }
 
-    // Initial logo entrance with spring physics
-    logoScale.value = withSpring(1, { 
-      damping: 8, 
-      stiffness: 100,
-      mass: 1.2 
-    });
+    // Enhanced logo entrance with dramatic effect
+    logoScale.value = withDelay(200, withSpring(1, { 
+      damping: 6, 
+      stiffness: 80,
+      mass: 1.5 
+    }));
     
-    logoOpacity.value = withTiming(1, { 
-      duration: 1200
-    });
+    logoOpacity.value = withDelay(200, withTiming(1, { 
+      duration: 1500,
+      easing: Easing.out(Easing.cubic)
+    }));
 
-    // Subtle rotation on entrance
-    logoRotation.value = withSequence(
-      withTiming(-5, { duration: 600 }),
-      withTiming(0, { duration: 400 })
-    );
+    // Dramatic rotation entrance
+    logoRotation.value = withDelay(200, withSequence(
+      withTiming(-10, { duration: 800, easing: Easing.out(Easing.back(1.5)) }),
+      withTiming(0, { duration: 600, easing: Easing.inOut(Easing.quad) })
+    ));
     
-    // Elegant brand name entrance sequence
-    riseOpacity.value = withDelay(600, withTiming(1, { duration: 800 }));
-    riseScale.value = withDelay(600, withSpring(1, { damping: 12, stiffness: 150 }));
-    riseRotation.value = withDelay(600, withSpring(0, { damping: 15, stiffness: 100 }));
+    // Enhanced brand name entrance sequence with stagger
+    riseOpacity.value = withDelay(800, withTiming(1, { duration: 1000, easing: Easing.out(Easing.cubic) }));
+    riseScale.value = withDelay(800, withSpring(1, { damping: 8, stiffness: 120 }));
+    riseRotation.value = withDelay(800, withSpring(0, { damping: 12, stiffness: 100 }));
     
-    // Ampersand with special effect
-    ampersandScale.value = withDelay(1000, withSpring(1.2, { damping: 8, stiffness: 200 }));
-    ampersandRotation.value = withDelay(1000, withSequence(
-      withTiming(360, { duration: 800 }),
+    // Ampersand with special dramatic effect
+    ampersandScale.value = withDelay(1200, withSequence(
+      withSpring(1.5, { damping: 6, stiffness: 200 }),
+      withSpring(1, { damping: 8, stiffness: 150 })
+    ));
+    ampersandRotation.value = withDelay(1200, withSequence(
+      withTiming(720, { duration: 1200, easing: Easing.out(Easing.back(1.2)) }),
       withSpring(0, { damping: 10 })
     ));
     
-    // SPEAK entrance
-    speakOpacity.value = withDelay(1200, withTiming(1, { duration: 800 }));
-    speakScale.value = withDelay(1200, withSpring(1, { damping: 12, stiffness: 150 }));
-    speakRotation.value = withDelay(1200, withSpring(0, { damping: 15, stiffness: 100 }));
+    // SPEAK entrance with delay
+    speakOpacity.value = withDelay(1400, withTiming(1, { duration: 1000, easing: Easing.out(Easing.cubic) }));
+    speakScale.value = withDelay(1400, withSpring(1, { damping: 8, stiffness: 120 }));
+    speakRotation.value = withDelay(1400, withSpring(0, { damping: 12, stiffness: 100 }));
     
-    // Brand glow effect
-    brandGlow.value = withDelay(1400, withRepeat(
+    // Enhanced brand effects
+    brandGlow.value = withDelay(1600, withRepeat(
       withSequence(
-        withTiming(1, { duration: 2000 }),
-        withTiming(0.3, { duration: 2000 })
+        withTiming(1, { duration: 2500, easing: Easing.inOut(Easing.sine) }),
+        withTiming(0.2, { duration: 2500, easing: Easing.inOut(Easing.sine) })
       ),
       -1,
       true
     ));
     
-    // Shimmer effect
-    shimmerPosition.value = withDelay(2000, withRepeat(
-      withTiming(1, { duration: 3000 }),
+    // Letter spacing animation
+    letterSpacing.value = withDelay(1800, withSequence(
+      withTiming(8, { duration: 1000, easing: Easing.out(Easing.cubic) }),
+      withTiming(3, { duration: 800, easing: Easing.inOut(Easing.quad) })
+    ));
+    
+    // Brand elevation effect
+    brandElevation.value = withDelay(2000, withRepeat(
+      withSequence(
+        withTiming(5, { duration: 3000, easing: Easing.inOut(Easing.sine) }),
+        withTiming(0, { duration: 3000, easing: Easing.inOut(Easing.sine) })
+      ),
+      -1,
+      true
+    ));
+    
+    // Enhanced shimmer effect
+    shimmerPosition.value = withDelay(2200, withRepeat(
+      withTiming(1, { duration: 3500, easing: Easing.inOut(Easing.quad) }),
       -1,
       false
     ));
     
-    // Text fade in with stagger
-    textOpacity.value = withDelay(1600, withTiming(1, { 
-      duration: 800
+    // Text and button animations
+    textOpacity.value = withDelay(2000, withTiming(1, { 
+      duration: 1000,
+      easing: Easing.out(Easing.cubic)
     }));
     
-    // Button fade in
-    buttonOpacity.value = withDelay(2200, withTiming(1, { 
-      duration: 600 
+    buttonOpacity.value = withDelay(2600, withTiming(1, { 
+      duration: 800,
+      easing: Easing.out(Easing.cubic)
     }));
     
-    // Glow effect
-    glowOpacity.value = withDelay(600, withRepeat(
+    // Enhanced glow effect
+    glowOpacity.value = withDelay(800, withRepeat(
       withSequence(
-        withTiming(0.8, { duration: 2000 }),
-        withTiming(0.3, { duration: 2000 })
+        withTiming(1, { duration: 2500, easing: Easing.inOut(Easing.sine) }),
+        withTiming(0.3, { duration: 2500, easing: Easing.inOut(Easing.sine) })
       ),
       -1,
       true
     ));
 
-    // Mic bounce animation
-    micBounce.value = withDelay(1000, withRepeat(
+    // Enhanced mic bounce animation
+    micBounce.value = withDelay(1200, withRepeat(
       withSequence(
-        withTiming(-8, { duration: 1500 }),
-        withTiming(0, { duration: 1500 })
+        withTiming(-12, { duration: 1800, easing: Easing.inOut(Easing.sine) }),
+        withTiming(0, { duration: 1800, easing: Easing.inOut(Easing.sine) })
       ),
       -1,
       true
     ));
 
-    // Play icon rotation
-    playIconRotation.value = withDelay(1200, withRepeat(
-      withTiming(360, { duration: 8000 }),
+    // Enhanced play icon rotation
+    playIconRotation.value = withDelay(1400, withRepeat(
+      withTiming(360, { duration: 10000, easing: Easing.linear }),
       -1,
       false
     ));
 
-    // Wave animation
+    // Enhanced wave animation
     waveAnimation.value = withRepeat(
-      withTiming(1, { duration: 3000 }),
+      withTiming(1, { duration: 3500, easing: Easing.inOut(Easing.sine) }),
       -1,
       true
     );
 
-    // Particle animation
+    // Enhanced particle animation
     particleAnimation.value = withRepeat(
-      withTiming(1, { duration: 4000 }),
+      withTiming(1, { duration: 5000, easing: Easing.inOut(Easing.quad) }),
       -1,
       false
     );
 
-    // Border animation
-    borderAnimation.value = withDelay(500, withRepeat(
+    // Enhanced border animation
+    borderAnimation.value = withDelay(600, withRepeat(
       withSequence(
-        withTiming(1, { duration: 2500 }),
-        withTiming(0, { duration: 2500 })
+        withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.sine) }),
+        withTiming(0, { duration: 3000, easing: Easing.inOut(Easing.sine) })
       ),
       -1,
       true
     ));
     
-    // Pulse animation for logo
+    // Enhanced pulse animation
     const startPulse = () => {
       pulseScale.value = withSequence(
-        withSpring(1.05, { duration: 1200 }),
-        withSpring(1, { duration: 1200 })
+        withSpring(1.08, { duration: 1500, damping: 8 }),
+        withSpring(1, { duration: 1500, damping: 8 })
       );
       brandPulse.value = withSequence(
-        withSpring(1.02, { duration: 1200 }),
-        withSpring(1, { duration: 1200 })
+        withSpring(1.03, { duration: 1500, damping: 10 }),
+        withSpring(1, { duration: 1500, damping: 10 })
       );
     };
     
-    setTimeout(startPulse, 3000);
-    const pulseInterval = setInterval(startPulse, 5000);
+    setTimeout(startPulse, 3500);
+    const pulseInterval = setInterval(startPulse, 6000);
     
-    setTimeout(() => setShowContent(true), 2400);
+    setTimeout(() => setShowContent(true), 2800);
     
     return () => clearInterval(pulseInterval);
-  }, [user, isLoading]);
+  }, [user, isLoading, isAuthenticated]);
 
+  // Enhanced animated styles
   const logoAnimatedStyle = useAnimatedStyle(() => ({
     transform: [
       { scale: logoScale.value * pulseScale.value },
@@ -211,7 +236,8 @@ export default function SplashScreen() {
     opacity: riseOpacity.value,
     transform: [
       { scale: riseScale.value * brandPulse.value },
-      { rotate: `${riseRotation.value}deg` }
+      { rotate: `${riseRotation.value}deg` },
+      { translateY: brandElevation.value }
     ]
   }));
 
@@ -219,14 +245,16 @@ export default function SplashScreen() {
     opacity: speakOpacity.value,
     transform: [
       { scale: speakScale.value * brandPulse.value },
-      { rotate: `${speakRotation.value}deg` }
+      { rotate: `${speakRotation.value}deg` },
+      { translateY: brandElevation.value }
     ]
   }));
 
   const ampersandAnimatedStyle = useAnimatedStyle(() => ({
     transform: [
       { scale: ampersandScale.value },
-      { rotate: `${ampersandRotation.value}deg` }
+      { rotate: `${ampersandRotation.value}deg` },
+      { translateY: brandElevation.value * 0.5 }
     ]
   }));
 
@@ -238,29 +266,33 @@ export default function SplashScreen() {
     const translateX = interpolate(
       shimmerPosition.value,
       [-1, 1],
-      [-width, width]
+      [-width * 0.8, width * 0.8]
     );
     return {
       transform: [{ translateX }],
       opacity: interpolate(
         shimmerPosition.value,
         [-1, -0.5, 0, 0.5, 1],
-        [0, 0.5, 1, 0.5, 0]
+        [0, 0.3, 0.8, 0.3, 0]
       )
     };
   });
 
   const brandGlowAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: brandGlow.value * 0.8,
+    opacity: brandGlow.value * 0.6,
     transform: [
       { 
         scale: interpolate(
           brandGlow.value,
-          [0.3, 1],
-          [1, 1.1]
+          [0.2, 1],
+          [1, 1.15]
         )
       }
     ]
+  }));
+
+  const letterSpacingAnimatedStyle = useAnimatedStyle(() => ({
+    letterSpacing: letterSpacing.value,
   }));
 
   const textAnimatedStyle = useAnimatedStyle(() => ({
@@ -270,7 +302,7 @@ export default function SplashScreen() {
         translateY: interpolate(
           textOpacity.value,
           [0, 1],
-          [30, 0]
+          [40, 0]
         )
       }
     ]
@@ -283,7 +315,7 @@ export default function SplashScreen() {
         translateY: interpolate(
           buttonOpacity.value,
           [0, 1],
-          [20, 0]
+          [30, 0]
         )
       }
     ]
@@ -295,8 +327,8 @@ export default function SplashScreen() {
       { 
         scale: interpolate(
           glowOpacity.value,
-          [0.3, 0.8],
-          [1, 1.2]
+          [0.3, 1],
+          [1, 1.3]
         )
       }
     ]
@@ -318,12 +350,12 @@ export default function SplashScreen() {
     const scale = interpolate(
       waveAnimation.value,
       [0, 1],
-      [0.8, 1.2]
+      [0.7, 1.3]
     );
     const opacity = interpolate(
       waveAnimation.value,
       [0, 0.5, 1],
-      [0.3, 0.8, 0.3]
+      [0.2, 1, 0.2]
     );
     return {
       transform: [{ scale }],
@@ -335,11 +367,11 @@ export default function SplashScreen() {
     const translateY = interpolate(
       particleAnimation.value,
       [0, 1],
-      [0, -height * 0.8]
+      [0, -height * 0.9]
     );
     const opacity = interpolate(
       particleAnimation.value,
-      [0, 0.3, 0.7, 1],
+      [0, 0.2, 0.8, 1],
       [0, 1, 1, 0]
     );
     return {
@@ -352,7 +384,7 @@ export default function SplashScreen() {
     const borderOpacity = interpolate(
       borderAnimation.value,
       [0, 1],
-      [0.2, 1]
+      [0.3, 1]
     );
     return {
       opacity: borderOpacity,
@@ -360,27 +392,27 @@ export default function SplashScreen() {
   });
 
   const handleLogoPress = () => {
-    // Add press animation
+    // Enhanced press animation
     logoScale.value = withSequence(
-      withTiming(0.95, { duration: 100 }),
-      withSpring(1, { duration: 300 })
+      withTiming(0.92, { duration: 150 }),
+      withSpring(1, { duration: 400 })
     );
     
     // Brand name press effect
     riseScale.value = withSequence(
-      withTiming(0.98, { duration: 100 }),
-      withSpring(1, { duration: 300 })
+      withTiming(0.96, { duration: 150 }),
+      withSpring(1, { duration: 400 })
     );
     speakScale.value = withSequence(
-      withTiming(0.98, { duration: 100 }),
-      withSpring(1, { duration: 300 })
+      withTiming(0.96, { duration: 150 }),
+      withSpring(1, { duration: 400 })
     );
     
     triggerHapticFeedback();
     
     setTimeout(() => {
       router.push('/auth');
-    }, 200);
+    }, 300);
   };
 
   // Show loading state while checking auth
@@ -392,7 +424,10 @@ export default function SplashScreen() {
           style={styles.gradient}
         >
           <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Loading...</Text>
+            <View style={styles.loadingSpinner}>
+              <Animated.View style={[styles.spinnerRing, waveAnimatedStyle]} />
+            </View>
+            <Text style={styles.loadingText}>Initializing RISE & SPEAK...</Text>
           </View>
         </LinearGradient>
       </View>
@@ -407,9 +442,9 @@ export default function SplashScreen() {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        {/* Animated Background Particles */}
+        {/* Enhanced Animated Background Particles */}
         <View style={styles.particleContainer}>
-          {[...Array(12)].map((_, i) => (
+          {[...Array(20)].map((_, i) => (
             <Animated.View
               key={i}
               style={[
@@ -417,61 +452,65 @@ export default function SplashScreen() {
                 particleAnimatedStyle,
                 {
                   left: Math.random() * width,
+                  backgroundColor: i % 2 === 0 ? Colors.primary[500] + '40' : Colors.accent.pink + '30',
                 }
               ]}
             />
           ))}
         </View>
 
-        {/* Floating Wave Elements */}
+        {/* Enhanced Floating Wave Elements */}
         <Animated.View style={[styles.waveElement, styles.wave1, waveAnimatedStyle]} />
         <Animated.View style={[styles.waveElement, styles.wave2, waveAnimatedStyle]} />
         <Animated.View style={[styles.waveElement, styles.wave3, waveAnimatedStyle]} />
 
         <View style={styles.content}>
-          {/* Logo Section */}
+          {/* Enhanced Logo Section */}
           <TouchableOpacity 
             style={styles.logoContainer}
             onPress={handleLogoPress}
-            activeOpacity={0.9}
+            activeOpacity={0.8}
           >
             <Animated.View style={[styles.logoWrapper, logoAnimatedStyle]}>
-              {/* Animated Border Ring */}
+              {/* Enhanced Animated Border Ring */}
               <Animated.View style={[styles.borderRing, borderAnimatedStyle, { borderColor: Colors.secondary[400] }]} />
               
-              {/* Glow Effect */}
-              <Animated.View style={[styles.glowEffect, glowAnimatedStyle, { backgroundColor: Colors.primary[500] + '30' }]} />
+              {/* Enhanced Glow Effect */}
+              <Animated.View style={[styles.glowEffect, glowAnimatedStyle, { backgroundColor: Colors.primary[500] + '20' }]} />
               
               {/* Main Logo Background */}
               <LinearGradient
-                colors={Colors.gradients.primary}
+                colors={Colors.gradients.brand}
                 style={styles.logoBackground}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
                 <View style={styles.logoContent}>
-                  {/* Animated Microphone */}
+                  {/* Enhanced Animated Microphone */}
                   <Animated.View style={micAnimatedStyle}>
-                    <Mic size={40} color="#FFFFFF" strokeWidth={2.5} />
+                    <Mic size={45} color="#FFFFFF" strokeWidth={2.5} />
                   </Animated.View>
                   
-                  {/* Rotating Play Icon */}
+                  {/* Enhanced Rotating Play Icon */}
                   <Animated.View style={[styles.playIcon, playIconAnimatedStyle]}>
                     <LinearGradient
                       colors={Colors.gradients.accent}
                       style={styles.playIconBackground}
                     >
-                      <Play size={16} color="#FFFFFF" fill="#FFFFFF" />
+                      <Play size={18} color="#FFFFFF" fill="#FFFFFF" />
                     </LinearGradient>
                   </Animated.View>
 
-                  {/* Sound Waves */}
+                  {/* Enhanced Sound Waves */}
                   <View style={styles.soundWaves}>
                     <Animated.View style={[styles.soundWave, styles.soundWave1, waveAnimatedStyle]}>
-                      <Waves size={12} color="rgba(255,255,255,0.6)" />
+                      <Waves size={14} color="rgba(255,255,255,0.7)" />
                     </Animated.View>
                     <Animated.View style={[styles.soundWave, styles.soundWave2, waveAnimatedStyle]}>
-                      <Radio size={10} color="rgba(255,255,255,0.4)" />
+                      <Radio size={12} color="rgba(255,255,255,0.5)" />
+                    </Animated.View>
+                    <Animated.View style={[styles.soundWave, styles.soundWave3, waveAnimatedStyle]}>
+                      <Sparkles size={10} color="rgba(255,255,255,0.6)" />
                     </Animated.View>
                   </View>
                 </View>
@@ -481,14 +520,14 @@ export default function SplashScreen() {
 
           {/* Enhanced Brand Text with Creative Animations */}
           <Animated.View style={[styles.brandContainer, brandContainerAnimatedStyle]}>
-            {/* Brand Glow Background */}
+            {/* Enhanced Brand Glow Background */}
             <Animated.View style={[styles.brandGlowBackground, brandGlowAnimatedStyle]} />
             
-            {/* Shimmer Effect */}
+            {/* Enhanced Shimmer Effect */}
             <Animated.View style={[styles.shimmerOverlay, shimmerAnimatedStyle]} />
             
             <View style={styles.brandTextContainer}>
-              {/* RISE with elegant entrance */}
+              {/* RISE with enhanced entrance */}
               <Animated.View style={[styles.wordContainer, riseAnimatedStyle]}>
                 <LinearGradient
                   colors={[Colors.primary[400], Colors.secondary[400], Colors.accent.pink]}
@@ -496,21 +535,24 @@ export default function SplashScreen() {
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                 >
-                  <Text style={[styles.brandWord, styles.riseText]}>RISE</Text>
+                  <Animated.Text style={[styles.brandWord, styles.riseText, letterSpacingAnimatedStyle]}>RISE</Animated.Text>
                 </LinearGradient>
               </Animated.View>
               
-              {/* Animated Ampersand */}
+              {/* Enhanced Animated Ampersand */}
               <Animated.View style={[styles.ampersandContainer, ampersandAnimatedStyle]}>
                 <LinearGradient
                   colors={Colors.gradients.accent}
                   style={styles.ampersandGradient}
                 >
                   <Text style={styles.ampersandText}>&</Text>
+                  <Animated.View style={[styles.ampersandSpark, waveAnimatedStyle]}>
+                    <Zap size={8} color="#FFFFFF" />
+                  </Animated.View>
                 </LinearGradient>
               </Animated.View>
               
-              {/* SPEAK with elegant entrance */}
+              {/* SPEAK with enhanced entrance */}
               <Animated.View style={[styles.wordContainer, speakAnimatedStyle]}>
                 <LinearGradient
                   colors={[Colors.accent.orange, Colors.accent.pink, Colors.secondary[500]]}
@@ -518,7 +560,7 @@ export default function SplashScreen() {
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                 >
-                  <Text style={[styles.brandWord, styles.speakText]}>SPEAK</Text>
+                  <Animated.Text style={[styles.brandWord, styles.speakText, letterSpacingAnimatedStyle]}>SPEAK</Animated.Text>
                 </LinearGradient>
               </Animated.View>
             </View>
@@ -530,21 +572,31 @@ export default function SplashScreen() {
             </View>
           </Animated.View>
 
-          {/* Call to Action */}
-          {showContent && !user && (
+          {/* Enhanced Call to Action */}
+          {showContent && !isAuthenticated && (
             <Animated.View style={[styles.ctaContainer, buttonAnimatedStyle]}>
-              <Text style={styles.ctaText}>Tap the logo to begin your journey</Text>
+              <Text style={styles.ctaText}>
+                {isLoading ? 'Checking authentication...' : 'Tap the logo to begin your journey'}
+              </Text>
               <View style={styles.tapIndicator}>
                 <Animated.View style={[styles.tapRipple, waveAnimatedStyle]} />
                 <Animated.View style={[styles.tapRipple2, waveAnimatedStyle]} />
               </View>
             </Animated.View>
           )}
+
+          {/* User Welcome Message */}
+          {showContent && isAuthenticated && user && (
+            <Animated.View style={[styles.welcomeContainer, buttonAnimatedStyle]}>
+              <Text style={styles.welcomeText}>Welcome back, {user.name}!</Text>
+              <Text style={styles.welcomeSubtext}>Redirecting to your dashboard...</Text>
+            </Animated.View>
+          )}
         </View>
 
-        {/* Footer */}
+        {/* Enhanced Footer */}
         <Animated.View style={[styles.footer, textAnimatedStyle]}>
-          <Text style={styles.footerText}>Powered by Innovation</Text>
+          <Text style={styles.footerText}>Powered by Innovation • Dark Mode</Text>
         </Animated.View>
       </LinearGradient>
     </View>
@@ -554,6 +606,7 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: Colors.dark.background,
   },
   gradient: {
     flex: 1,
@@ -563,6 +616,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  loadingSpinner: {
+    width: 60,
+    height: 60,
+    marginBottom: 20,
+  },
+  spinnerRing: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 30,
+    borderWidth: 3,
+    borderColor: Colors.primary[500],
+    borderTopColor: 'transparent',
   },
   loadingText: {
     fontFamily: 'Inter-Regular',
@@ -576,33 +642,32 @@ const styles = StyleSheet.create({
   },
   particle: {
     position: 'absolute',
-    width: 3,
-    height: 3,
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
-    borderRadius: 1.5,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
   },
   waveElement: {
     position: 'absolute',
-    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    backgroundColor: 'rgba(99, 102, 241, 0.08)',
     borderRadius: 50,
   },
   wave1: {
-    width: 100,
-    height: 100,
-    top: '20%',
-    left: '10%',
+    width: 120,
+    height: 120,
+    top: '15%',
+    left: '8%',
   },
   wave2: {
-    width: 80,
-    height: 80,
-    top: '60%',
-    right: '15%',
+    width: 100,
+    height: 100,
+    top: '65%',
+    right: '12%',
   },
   wave3: {
-    width: 60,
-    height: 60,
-    top: '80%',
-    left: '20%',
+    width: 80,
+    height: 80,
+    top: '85%',
+    left: '15%',
   },
   content: {
     flex: 1,
@@ -611,34 +676,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   logoContainer: {
-    marginBottom: 60,
+    marginBottom: 70,
   },
   logoWrapper: {
     position: 'relative',
   },
   borderRing: {
     position: 'absolute',
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    borderWidth: 2,
-    top: -10,
-    left: -10,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    borderWidth: 3,
+    top: -15,
+    left: -15,
   },
   logoBackground: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: Colors.primary[500],
     shadowOffset: {
       width: 0,
-      height: 20,
+      height: 25,
     },
-    shadowOpacity: 0.4,
-    shadowRadius: 30,
-    elevation: 20,
+    shadowOpacity: 0.5,
+    shadowRadius: 35,
+    elevation: 25,
   },
   logoContent: {
     justifyContent: 'center',
@@ -647,19 +712,19 @@ const styles = StyleSheet.create({
   },
   playIcon: {
     position: 'absolute',
-    bottom: -8,
-    right: -8,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    bottom: -10,
+    right: -10,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
   },
   playIconBackground: {
     width: '100%',
     height: '100%',
-    borderRadius: 16,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: '#FFFFFF',
   },
   soundWaves: {
@@ -671,129 +736,138 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   soundWave1: {
-    top: 10,
-    left: -20,
+    top: 8,
+    left: -25,
   },
   soundWave2: {
-    bottom: 10,
-    right: -20,
+    bottom: 8,
+    right: -25,
+  },
+  soundWave3: {
+    top: 25,
+    right: -30,
   },
   glowEffect: {
     position: 'absolute',
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    top: -20,
-    left: -20,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    top: -25,
+    left: -25,
     zIndex: -1,
   },
   brandContainer: {
     alignItems: 'center',
-    marginBottom: 80,
+    marginBottom: 90,
     position: 'relative',
   },
   brandGlowBackground: {
     position: 'absolute',
-    width: 400,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: 'rgba(99, 102, 241, 0.2)',
-    top: -20,
+    width: 450,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    top: -25,
     zIndex: -1,
   },
   shimmerOverlay: {
     position: 'absolute',
-    width: 200,
-    height: 80,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    width: 250,
+    height: 90,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
     top: 0,
     zIndex: 1,
-    borderRadius: 40,
+    borderRadius: 45,
   },
   brandTextContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
     position: 'relative',
     zIndex: 2,
   },
   wordContainer: {
-    marginHorizontal: 4,
+    marginHorizontal: 6,
   },
   wordGradient: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 25,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 6,
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 12,
   },
   brandWord: {
     fontFamily: 'Inter-Bold',
-    fontSize: 32,
+    fontSize: 36,
     color: '#FFFFFF',
-    letterSpacing: 3,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    textShadowColor: 'rgba(0, 0, 0, 0.6)',
+    textShadowOffset: { width: 0, height: 3 },
+    textShadowRadius: 6,
   },
   riseText: {
-    transform: [{ skewX: '-5deg' }],
+    transform: [{ skewX: '-6deg' }],
   },
   speakText: {
-    transform: [{ skewX: '5deg' }],
+    transform: [{ skewX: '6deg' }],
   },
   ampersandContainer: {
-    marginHorizontal: 8,
-    marginTop: -4,
+    marginHorizontal: 12,
+    marginTop: -6,
+    position: 'relative',
   },
   ampersandGradient: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: Colors.accent.orange,
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 6,
     },
-    shadowOpacity: 0.6,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOpacity: 0.7,
+    shadowRadius: 12,
+    elevation: 12,
   },
   ampersandText: {
     fontFamily: 'Inter-Bold',
-    fontSize: 24,
+    fontSize: 28,
     color: '#FFFFFF',
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    textShadowColor: 'rgba(0, 0, 0, 0.6)',
+    textShadowOffset: { width: 0, height: 3 },
+    textShadowRadius: 6,
+  },
+  ampersandSpark: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
   },
   brandSubtitle: {
     fontFamily: 'Inter-Medium',
-    fontSize: 16,
+    fontSize: 18,
     textAlign: 'center',
-    marginBottom: 16,
-    letterSpacing: 1,
+    marginBottom: 18,
+    letterSpacing: 1.2,
   },
   taglineContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    gap: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 25,
     borderWidth: 1,
   },
   tagline: {
     fontFamily: 'Inter-Regular',
-    fontSize: 14,
+    fontSize: 16,
     color: Colors.neutral[200],
   },
   ctaContainer: {
@@ -802,38 +876,58 @@ const styles = StyleSheet.create({
   },
   ctaText: {
     fontFamily: 'Inter-Regular',
-    fontSize: 16,
+    fontSize: 18,
     color: Colors.neutral[300],
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 25,
+  },
+  welcomeContainer: {
+    alignItems: 'center',
+    backgroundColor: Colors.dark.cardElevated,
+    paddingHorizontal: 30,
+    paddingVertical: 20,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
+  },
+  welcomeText: {
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 20,
+    color: '#FFFFFF',
+    marginBottom: 8,
+  },
+  welcomeSubtext: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 14,
+    color: Colors.neutral[400],
   },
   tapIndicator: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
   },
   tapRipple: {
     position: 'absolute',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   tapRipple2: {
     position: 'absolute',
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   footer: {
     position: 'absolute',
-    bottom: 40,
+    bottom: 50,
     left: 0,
     right: 0,
     alignItems: 'center',
@@ -841,6 +935,6 @@ const styles = StyleSheet.create({
   footerText: {
     fontFamily: 'Inter-Regular',
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.5)',
+    color: 'rgba(255, 255, 255, 0.4)',
   },
 });
