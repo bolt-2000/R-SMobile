@@ -59,13 +59,17 @@ export default function SplashScreen() {
   };
 
   useEffect(() => {
+    let timeoutIds: NodeJS.Timeout[] = [];
+    let intervalId: NodeJS.Timeout;
+
     // Check authentication and redirect accordingly
     if (!isLoading) {
       if (isAuthenticated && user) {
         // User is signed in, redirect to main app after animation
-        setTimeout(() => {
+        const redirectTimeout = setTimeout(() => {
           router.replace('/(tabs)');
         }, 3000);
+        timeoutIds.push(redirectTimeout);
         return;
       }
     }
@@ -215,12 +219,17 @@ export default function SplashScreen() {
       );
     };
     
-    setTimeout(startPulse, 3500);
-    const pulseInterval = setInterval(startPulse, 6000);
+    const pulseTimeout = setTimeout(startPulse, 3500);
+    timeoutIds.push(pulseTimeout);
+    intervalId = setInterval(startPulse, 6000);
     
-    setTimeout(() => setShowContent(true), 2800);
+    const contentTimeout = setTimeout(() => setShowContent(true), 2800);
+    timeoutIds.push(contentTimeout);
     
-    return () => clearInterval(pulseInterval);
+    return () => {
+      timeoutIds.forEach(id => clearTimeout(id));
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [user, isLoading, isAuthenticated]);
 
   // Enhanced animated styles
